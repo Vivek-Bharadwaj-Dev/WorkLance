@@ -1,0 +1,125 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* White */
+    --foreground: 220 13% 20%; /* Dark Slate Grey for Text */
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 20%;
+
+    --primary: 220 13% 15%; /* Near-black for primary actions */
+    --primary-foreground: 0 0% 98%; /* White text on primary buttons */
+
+    --secondary: 220 10% 96%; /* Very light grey */
+    --secondary-foreground: 220 13% 25%;
+
+    --muted: 220 10% 90%; /* Light grey for muted elements */
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 220 10% 96%; /* Same as secondary for a minimal look */
+    --accent-foreground: 220 13% 25%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%; 
+
+    --border: 220 10% 88%;
+    --input: 220 10% 92%;
+    --ring: 220 13% 20%;
+
+    --chart-1: 220 50% 50%;
+    --chart-2: 220 50% 65%;
+    --chart-3: 220 30% 60%;
+    --chart-4: 220 30% 80%;
+    --chart-5: 220 15% 50%;
+    
+    --radius: 0.75rem; 
+
+    /* Sidebar specific colors */
+    --sidebar-background: 220 10% 98%;
+    --sidebar-foreground: 220 13% 20%;
+    --sidebar-primary: 220 13% 15%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 220 10% 92%;
+    --sidebar-accent-foreground: 220 13% 20%;
+    --sidebar-border: 220 10% 88%;
+    --sidebar-ring: 220 13% 20%;
+  }
+
+  .dark {
+    --background: 220 13% 8%; /* Very Dark Slate */
+    --foreground: 210 20% 90%; 
+
+    --card: 220 13% 12%;
+    --card-foreground: 210 20% 90%;
+
+    --popover: 220 13% 12%; 
+    --popover-foreground: 210 20% 90%;
+
+    --primary: 210 20% 95%; /* Near-white for primary actions */
+    --primary-foreground: 220 13% 10%; /* Dark text on bright primary */
+
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 210 15% 75%; 
+
+    --muted: 220 15% 18%; 
+    --muted-foreground: 210 15% 65%;
+
+    --accent: 220 15% 20%;
+    --accent-foreground: 210 15% 75%;
+
+    --destructive: 0 70% 55%; 
+    --destructive-foreground: 0 0% 98%; 
+
+    --border: 220 15% 22%;
+    --input: 220 15% 18%;
+    --ring: 210 20% 95%;
+
+    --chart-1: 210 80% 60%; /* Bright Blue */
+    --chart-2: 210 70% 50%;
+    --chart-3: 210 60% 70%;
+    --chart-4: 210 20% 70%; 
+    --chart-5: 210 15% 50%; 
+
+    /* Dark Sidebar specific colors */
+    --sidebar-background: 220 13% 5%; 
+    --sidebar-foreground: 210 20% 90%; 
+    --sidebar-primary: 210 20% 95%; 
+    --sidebar-primary-foreground: 220 13% 10%; 
+    --sidebar-accent: 220 15% 18%; 
+    --sidebar-accent-foreground: 210 20% 90%; 
+    --sidebar-border: 220 15% 15%; 
+    --sidebar-ring: 210 20% 95%; 
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+  h1 { @apply text-4xl md:text-5xl; }
+  h2 { @apply text-3xl; }
+  h3 { @apply text-2xl; }
+  p { @apply leading-relaxed; }
+}
+
+@layer components {
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  .container-xl {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
