@@ -45,13 +45,9 @@ The platform is heavily focused on UX and performance, featuring **AI-powered jo
 
 *(Replace placeholders with actual image paths)*
 
-| Homepage | Freelancer Dashboard |
+| Homepage | Job Listings |
 |:---:|:---:|
-| \<img src="docs/placeholder-home.png" alt="Homepage" width="400"/\> | \<img src="docs/placeholder-dashboard.png" alt="Dashboard" width="400"/\> |
-
-| AI Job Matcher | Job Listings |
-|:---:|:---:|
-| \<img src="docs/placeholder-ai.png" alt="AI Matching" width="400"/\> | \<img src="docs/placeholder-jobs.png" alt="Job Board" width="400"/\> |
+| \<img src="public/images/Screenshot of WorkLance.png" alt="Homepage" width="400"/\> | \<img src="public/images/Job Matching WorkLance..png" alt="Job Listings" width="400"/\> |
 
 -----
 
