@@ -14,7 +14,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Worklance - Freelance & Internship Platform for Students',
   description: 'Connecting university students with businesses for tech projects, internships, and freelance opportunities.',
-  // Add more metadata like open graph tags, icons etc. for a production app
 };
 
 export default function RootLayout({
