@@ -1,5 +1,3 @@
-\<div align="center"\>
-
 # WorkLance
 
 *Connecting businesses with elite freelance talent — fast, secure, and beautifully.*
@@ -12,7 +10,6 @@
 
 [View Repository](https://github.com/Vivek21Bharadwaj/WorkLance) • [Report Bug](https://www.google.com/search?q=https://github.com/Vivek21Bharadwaj/WorkLance/issues) • [Request Feature](https://www.google.com/search?q=https://github.com/Vivek21Bharadwaj/WorkLance/issues)
 
-\</div\>
 
 -----
 
