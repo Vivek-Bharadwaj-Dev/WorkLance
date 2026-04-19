@@ -14,7 +14,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-foreground">1. Acceptance of Terms</h2>
             <p>
-              Welcome to Interna ("Platform", "we", "us", or "our"). By accessing or using our Platform,
+              Welcome to Worklance ("Platform", "we", "us", or "our"). By accessing or using our Platform,
               you agree to be bound by these Terms of Service ("Terms") and our Privacy Policy. If you do not
               agree to these Terms, please do not use our Platform.
             </p>
@@ -23,7 +23,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-foreground">2. Platform Services</h2>
             <p>
-              Interna provides an online marketplace connecting university students ("Students", "Freelancers")
+              Worklance provides an online marketplace connecting university students ("Students", "Freelancers")
               with local businesses and individuals ("Clients") seeking to procure freelance services ("Jobs", "Projects").
               We facilitate profiles, job postings, applications, communication, and payment processing (features may vary).
             </p>
@@ -51,7 +51,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground">5. Job Postings and Applications</h2>
             <p>
               Clients are responsible for the accuracy and legality of their job postings. Students are responsible
-              for the accuracy of their profiles and proposals. Interna does not guarantee employment or project
+              for the accuracy of their profiles and proposals. Worklance does not guarantee employment or project
               completion and is not responsible for the quality of services provided by Students or payment fulfillment by Clients,
               though we may offer dispute resolution mechanisms.
             </p>
@@ -60,7 +60,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-foreground">6. Fees and Payments</h2>
             <p>
-              Interna may charge fees for certain services (e.g., commission on completed jobs, premium features).
+              Worklance may charge fees for certain services (e.g., commission on completed jobs, premium features).
               Any applicable fees will be clearly disclosed. Users agree to pay all fees associated with their use of
               such services. Payment processing may be handled by third-party providers.
             </p>
@@ -70,7 +70,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground">7. Intellectual Property</h2>
             <p>
               The Platform and its original content (excluding User Content), features, and functionality are and will
-              remain the exclusive property of Interna and its licensors. By posting content, you grant Interna
+              remain the exclusive property of Worklance and its licensors. By posting content, you grant Worklance
               a non-exclusive, worldwide, royalty-free license to use, display, and distribute your content in connection
               with operating and promoting the Platform.
             </p>
@@ -87,7 +87,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-foreground">9. Limitation of Liability</h2>
             <p>
-              In no event shall Interna be liable for any indirect, incidental, special, consequential, or punitive
+              In no event shall Worklance be liable for any indirect, incidental, special, consequential, or punitive
               damages arising out of or related to your use of the Platform.
             </p>
           </section>
@@ -104,7 +104,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-foreground">11. Contact Us</h2>
             <p>
-              If you have any questions about these Terms, please contact us at <a href="mailto:legal@interna.com" className="text-primary hover:underline">legal@interna.com</a>.
+              If you have any questions about these Terms, please contact us at <a href="mailto:legal@Worklance.com" className="text-primary hover:underline">legal@Worklance.com</a>.
             </p>
           </section>
         </CardContent>

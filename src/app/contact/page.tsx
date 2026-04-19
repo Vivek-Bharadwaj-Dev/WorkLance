@@ -92,7 +92,7 @@ export default function ContactPage() {
                 <Mail className="h-5 w-5 text-primary mr-3 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-foreground">Email Us</h3>
-                  <a href="mailto:support@interna.com" className="hover:text-primary">support@interna.com</a>
+                  <a href="mailto:support@Worklance.com" className="hover:text-primary">support@Worklance.com</a>
                 </div>
               </div>
               <div className="flex items-start">

@@ -87,7 +87,7 @@ export default function StudentPaymentsPage() {
         <CardHeader>
           <CardTitle>Payment History</CardTitle>
           <CardDescription>
-            A record of all your transactions on Interna.
+            A record of all your transactions on Worklance.
           </CardDescription>
         </CardHeader>
         <CardContent>

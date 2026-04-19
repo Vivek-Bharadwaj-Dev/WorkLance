@@ -9,9 +9,9 @@ import { getAnalytics, type Analytics } from "firebase/analytics"; // Added Anal
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAZQ5rOCfJBIhiS82UGbsc4gYhfPi_oLKk",
-  authDomain: "interna-460211.firebaseapp.com",
-  projectId: "interna-460211",
-  storageBucket: "interna-460211.appspot.com", // Corrected to standard .appspot.com format
+  authDomain: "Worklance-460211.firebaseapp.com",
+  projectId: "Worklance-460211",
+  storageBucket: "Worklance-460211.appspot.com", // Corrected to standard .appspot.com format
   messagingSenderId: "1088065186564",
   appId: "1:1088065186564:web:647304b854384474967e51",
   measurementId: "G-WK1S7YPTTM"

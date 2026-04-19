@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 
 const ITEMS_PER_PAGE = 9;
-const USER_DB_KEY = 'internaMockUserDB';
+const USER_DB_KEY = 'WorklanceMockUserDB';
 
 const MOCK_STUDENTS_INITIAL_SEED: StudentProfile[] = [];
 

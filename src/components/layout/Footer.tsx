@@ -41,7 +41,7 @@ export default function Footer() {
 
           {/* Column 1: Brand & Socials */}
           <div className="space-y-5 sm:col-span-2 lg:col-span-1">
-            <Logo iconSize={20} textSize="text-2xl" />
+            <Logo iconSize={48} textSize="text-2xl" />
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               Connecting student talent with innovative businesses for freelance projects and internships.
             </p>
@@ -116,7 +116,7 @@ export default function Footer() {
             <div className="space-y-3 pt-2">
               <div className="flex items-center space-x-3 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 shrink-0 text-primary/60" />
-                <span>support@interna.com</span>
+                <span>support@Worklance.com</span>
               </div>
               <div className="flex items-center space-x-3 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 shrink-0 text-primary/60" />
@@ -130,7 +130,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-14 pt-8 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Interna. All rights reserved.
+            &copy; {new Date().getFullYear()} Worklance. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
             Building bridges between student potential and business innovation.

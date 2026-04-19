@@ -19,6 +19,7 @@ import { Logo } from '@/components/shared/Logo';
 import { mainNavLinks, guestNavLinks, NavLinkType } from '@/lib/constants';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,10 +44,80 @@ export default function Header() {
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
     }
+    
+    // Sync Supabase Auth State to LocalStorage (Essential for OAuth)
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      // Check immediate session on mount/nav
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          const role = session.user.user_metadata?.role || 'student';
+          const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'User';
+          const email = session.user.email || '';
+          
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('userEmail', email);
+          localStorage.setItem('userName', name);
+          localStorage.setItem('userRole', role);
+          
+          setIsLoggedIn(true);
+          setUserRole(role);
+          setUserName(name);
+        }
+      });
+
+      // Listen for auth changes (like returning from an OAuth callback)
+      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const role = session.user.user_metadata?.role || 'student';
+          const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'User';
+          const email = session.user.email || '';
+
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('userEmail', email);
+          localStorage.setItem('userName', name);
+          localStorage.setItem('userRole', role);
+
+          setIsLoggedIn(true);
+          setUserRole(role);
+          setUserName(name);
+        } else if (event === 'SIGNED_OUT') {
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('userEmail');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userRole');
+          setIsLoggedIn(false);
+          setUserRole(null);
+          setUserName("User");
+        }
+      });
+
+      return () => {
+        authListener.subscription.unsubscribe();
+      };
+    } catch (e) {
+      console.error("Supabase not initialized", e);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      await supabase.auth.signOut();
+    } catch(e) {
+      console.error("Error signing out of Supabase", e);
+    }
+    
+    // The onAuthStateChange listener will handle clearing localStorage, 
+    // but we can clear it immediately for a faster UI response.
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
@@ -100,9 +171,10 @@ export default function Header() {
       asChild
       className={cn(
         "font-medium transition-colors duration-200 ease-in-out",
-        pathname === link.href ? "text-primary hover:text-primary/90 bg-primary/10" : "text-muted-foreground hover:text-primary hover:bg-primary/5",
         isMobile ? "w-full justify-start text-base py-3 border-b border-border/20 rounded-none last:border-b-0" : "px-3 py-2 rounded-md",
-        link.isButton && !isMobile ? "bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 shadow-sm hover:shadow-md" : ""
+        link.isButton && !isMobile 
+          ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground px-5 py-2.5 shadow-sm hover:shadow-md"
+          : (pathname === link.href ? "text-primary hover:text-primary/90 bg-primary/10" : "text-muted-foreground hover:text-primary hover:bg-primary/5")
       )}
       onClick={() => isMobile && setIsMobileMenuOpen(false)}
     >
@@ -171,7 +243,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/75">
       <div className="container-xl flex h-20 items-center justify-between">
-        <Logo iconSize={18} textSize="text-2xl" />
+        <Logo iconSize={40} textSize="text-2xl" />
         <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
           {activeLinks.map(link => renderNavLink(link))}
         </nav>
@@ -193,7 +265,7 @@ export default function Header() {
             <SheetContent side="right" className="w-full max-w-xs p-0 bg-background flex flex-col">
               <div className="p-6 flex justify-between items-center border-b">
                 <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
-                <Logo iconSize={12} textSize="text-xl" />
+                <Logo iconSize={32} textSize="text-xl" />
               </div>
               <nav className="flex-grow flex flex-col space-y-0 p-4">
                 {activeLinks.map(link => renderNavLink(link, true))}

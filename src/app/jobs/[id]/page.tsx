@@ -58,6 +58,8 @@ export default function JobDetailsPage() {
   const [job, setJob] = useState<Job | null | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInUserEmail, setLoggedInUserEmail] = useState<string | null>(null);
+  const [isApplying, setIsApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -132,6 +134,30 @@ export default function JobDetailsPage() {
     router.push(`/messages/${chatId}`);
   };
 
+  const handleApply = () => {
+    if (!loggedInUserEmail) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to apply for jobs.",
+        variant: "destructive",
+      });
+      router.push(`/login?redirect=${pathname}`);
+      return;
+    }
+    
+    setIsApplying(true);
+    // Mock application process
+    setTimeout(() => {
+      setIsApplying(false);
+      setHasApplied(true);
+      toast({
+        title: "Application Submitted!",
+        description: "The client will be able to review your profile and proposal.",
+        variant: "default",
+      });
+    }, 1500);
+  };
+
   const isOwnJobPost = loggedInUserEmail && job && job.postedBy.id.toLowerCase() === loggedInUserEmail;
 
   if (isLoading || job === undefined) {
@@ -187,9 +213,21 @@ export default function JobDetailsPage() {
             </div>
             <div className="flex-shrink-0 space-x-2 mt-4 md:mt-0">
                 <Button variant="outline" size="sm" disabled><Share2 className="mr-2 h-4 w-4" /> Share (Soon)</Button>
-                <Button size="lg" className="bg-primary hover:bg-primary/90" disabled={!!isOwnJobPost}>
-                  {isOwnJobPost ? "This is Your Post" : "Apply Now (Soon)"}
-                  {!isOwnJobPost && <ExternalLink className="ml-2 h-4 w-4"/>}
+                <Button 
+                  size="lg" 
+                  className="bg-primary hover:bg-primary/90" 
+                  disabled={!!isOwnJobPost || hasApplied || isApplying}
+                  onClick={handleApply}
+                >
+                  {isOwnJobPost 
+                    ? "This is Your Post" 
+                    : isApplying 
+                      ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Applying...</>
+                      : hasApplied
+                        ? "Applied"
+                        : "Apply Now"
+                  }
+                  {!isOwnJobPost && !hasApplied && !isApplying && <ExternalLink className="ml-2 h-4 w-4"/>}
                 </Button>
             </div>
           </div>

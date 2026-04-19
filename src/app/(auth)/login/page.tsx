@@ -91,15 +91,9 @@ export default function LoginPage() {
     if (data?.user) {
       toast({
         title: "Login Successful!",
-        description: "Welcome back to Interna!",
+        description: "Welcome back to Worklance!",
         variant: "default",
       });
-      
-      // We will let middleware handle the session cookie, but for client-side state
-      // if relying on localStorage for dashboard routing (to be migrated later):
-      localStorage.setItem('isLoggedIn', 'true');
-      const role = data.user.user_metadata?.role || 'student';
-      localStorage.setItem('userRole', role);
       
       router.push("/"); 
       router.refresh();
@@ -154,14 +148,14 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
       <div className="mb-10 text-center">
-        <Logo iconSize={24} showText={false} className="justify-center mb-4" />
-        <Logo className="justify-center" iconSize={6} textSize="text-3xl" />
+        <Logo iconSize={64} showText={false} className="justify-center mb-4" />
+        <Logo className="justify-center" iconSize={48} textSize="text-3xl" />
         <p className="mt-3 text-muted-foreground">Your gateway to student talent and freelance projects.</p>
       </div>
       <Card className="w-full max-w-md shadow-xl rounded-xl border-border/60 bg-card">
         <CardHeader className="text-center pt-8">
           <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
-          <CardDescription>Log in to access your Interna dashboard.</CardDescription>
+          <CardDescription>Log in to access your Worklance dashboard.</CardDescription>
         </CardHeader>
         <CardContent className="px-6 py-7">
           <Form {...form}>
@@ -219,11 +213,11 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3">
+            <div className="mt-6 flex flex-row gap-3">
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-11 rounded-lg"
+                className="w-1/2 h-11 rounded-lg"
                 onClick={() => handleOAuthLogin('google')}
               >
                 <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
@@ -244,18 +238,18 @@ export default function LoginPage() {
                     fill="#EA4335"
                   />
                 </svg>
-                Sign in with Google
+                Google
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-11 rounded-lg"
+                className="w-1/2 h-11 rounded-lg"
                 onClick={() => handleOAuthLogin('facebook')}
               >
                 <svg className="mr-2 h-5 w-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
-                Sign in with Facebook
+                Facebook
               </Button>
             </div>
           </div>

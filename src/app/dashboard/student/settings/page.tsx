@@ -56,7 +56,7 @@ export default function StudentSettingsPage() {
               <Bell className="h-6 w-6 text-primary" />
               <CardTitle>Notification Preferences</CardTitle>
             </div>
-            <CardDescription>Choose how you want to be notified by Interna.</CardDescription>
+            <CardDescription>Choose how you want to be notified by Worklance.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
@@ -97,7 +97,7 @@ export default function StudentSettingsPage() {
               <Palette className="h-6 w-6 text-primary" />
               <CardTitle>Appearance</CardTitle>
             </div>
-            <CardDescription>Customize the look and feel of the Interna platform.</CardDescription>
+            <CardDescription>Customize the look and feel of the Worklance platform.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
@@ -157,7 +157,7 @@ export default function StudentSettingsPage() {
                   <SelectItem value="de">Deutsch (German)</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Full internationalization (i18n) support needs to be implemented.</p>
+              <p className="text-xs text-muted-foreground">Full Worklancetionalization (i18n) support needs to be implemented.</p>
             </div>
           </CardContent>
         </Card>

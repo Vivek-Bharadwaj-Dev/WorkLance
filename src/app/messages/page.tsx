@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button';
 import type { ChatSummary, Message, User } from '@/types';
 import { AlertTriangle, Inbox, Loader2 } from 'lucide-react';
 
-const MESSAGES_DB_KEY = 'internaMockMessagesDB';
-const USERS_DB_KEY = 'internaMockUserDB';
+const MESSAGES_DB_KEY = 'WorklanceMockMessagesDB';
+const USERS_DB_KEY = 'WorklanceMockUserDB';
 
 export default function MessagesPage() {
   const [chatSummaries, setChatSummaries] = useState<ChatSummary[]>([]);

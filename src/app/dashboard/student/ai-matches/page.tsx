@@ -12,8 +12,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Sparkles, AlertTriangle, Loader2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-const JOBS_DB_KEY = 'internaMockJobsDB';
-const USER_DB_KEY = 'internaMockUserDB'; // Assuming student's email is their ID
+const JOBS_DB_KEY = 'WorklanceMockJobsDB';
+const USER_DB_KEY = 'WorklanceMockUserDB'; // Assuming student's email is their ID
 
 const MOCK_JOBS_INITIAL_SEED: Job[] = [
     {

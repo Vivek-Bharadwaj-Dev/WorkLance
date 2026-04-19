@@ -13,7 +13,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const ITEMS_PER_PAGE = 9;
-const JOBS_DB_KEY = 'internaMockJobsDB';
+const JOBS_DB_KEY = 'WorklanceMockJobsDB';
 
 const MOCK_JOBS_INITIAL_SEED: Job[] = [
     {
@@ -149,7 +149,7 @@ const MOCK_JOBS_INITIAL_SEED: Job[] = [
   {
     id: "11",
     title: "Junior Python Developer (Automation Scripts)",
-    description: "Develop Python scripts to automate internal processes. Basic understanding of APIs and data manipulation is beneficial.",
+    description: "Develop Python scripts to automate Worklancel processes. Basic understanding of APIs and data manipulation is beneficial.",
     category: { id: "webdev", name: "Web Development" },
     type: "online",
     postedBy: { id: "client11", name: "Automate Everything Co.", avatarUrl: "https://dummyimage.com/40x40.png/eeeeee/333333&text=AE" },
@@ -449,15 +449,15 @@ function JobCard({ job }: { job: Job }) {
           <div className="mt-4">
             <div className="flex flex-wrap gap-1.5">
               {job.skillsRequired.slice(0,3).map(skill => (
-                <Badge key={skill} variant="outline" className="text-xs px-2 py-0.5 bg-muted/50 group-hover:border-accent/50 group-hover:text-accent transition-colors">{skill}</Badge>
+                <Badge key={skill} variant="outline" className="text-xs px-2 py-0.5 bg-muted/50 transition-colors uppercase">{skill}</Badge>
               ))}
-              {job.skillsRequired.length > 3 && <Badge variant="outline" className="text-xs px-2 py-0.5 bg-muted/50 group-hover:border-accent/50 group-hover:text-accent transition-colors">+{job.skillsRequired.length - 3} more</Badge>}
+              {job.skillsRequired.length > 3 && <Badge variant="outline" className="text-xs px-2 py-0.5 bg-muted/50 transition-colors">+{job.skillsRequired.length - 3} more</Badge>}
             </div>
           </div>
         )}
       </CardContent>
       <CardFooter className="p-5 border-t border-border/30 mt-auto">
-        <Button asChild className="w-full rounded-lg group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+        <Button asChild className="w-full rounded-lg transition-colors">
           <Link href={`/jobs/${job.id}`}>View Details <ChevronRight className="ml-1.5 h-4 w-4"/></Link>
         </Button>
       </CardFooter>
@@ -545,7 +545,7 @@ export default function JobsPage() {
                 <p className="mt-2 text-muted-foreground">Browse freelance jobs and internships perfect for university students.</p>
             </div>
             <Button variant="outline" className="mt-4 md:mt-0 rounded-lg">
-                <Sparkles className="mr-2 h-4 w-4 text-accent"/> AI Job Match (Soon)
+                <Sparkles className="mr-2 h-4 w-4 text-amber-500"/> AI Job Match (Soon)
             </Button>
         </div>
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">

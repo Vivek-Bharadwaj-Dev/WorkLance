@@ -14,7 +14,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-foreground">1. Introduction</h2>
             <p>
-              Interna ("we", "us", or "our") is committed to protecting your privacy. This Privacy Policy
+              Worklance ("we", "us", or "our") is committed to protecting your privacy. This Privacy Policy
               explains how we collect, use, disclose, and safeguard your information when you visit our
               platform. Please read this policy carefully.
             </p>
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
             <p>
               If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at:
               <br />
-              Email: <a href="mailto:privacy@interna.com" className="text-primary hover:underline">privacy@interna.com</a>
+              Email: <a href="mailto:privacy@Worklance.com" className="text-primary hover:underline">privacy@Worklance.com</a>
               <br />
               Address: 123 University Drive, Innovation Hub, Anytown, ST 54321
             </p>

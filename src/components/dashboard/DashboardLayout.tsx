@@ -33,7 +33,7 @@ export function DashboardLayout({ navLinks, children, title, description }: Dash
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r bg-background sm:flex mt-16 mb-16"> {/* Adjust mt/mb for header/footer height */}
         <div className="flex flex-col h-full">
           <div className="p-4 border-b">
-            <Logo iconSize={10} textSize="text-lg" /> {/* Doubled iconSize from 5 to 10 */}
+            <Logo iconSize={40} textSize="text-lg" />
           </div>
           <ScrollArea className="flex-1 py-4">
             <nav className="grid items-start px-4 text-sm font-medium">

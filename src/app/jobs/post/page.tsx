@@ -30,7 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge"; 
 import { useRouter } from "next/navigation";
 
-const JOBS_DB_KEY = 'internaMockJobsDB';
+const JOBS_DB_KEY = 'WorklanceMockJobsDB';
 
 const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters").max(100),
