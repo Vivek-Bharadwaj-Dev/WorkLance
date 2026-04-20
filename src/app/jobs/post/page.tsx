@@ -29,8 +29,8 @@ import { CalendarIcon, DollarSign, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge"; 
 import { useRouter } from "next/navigation";
-
-const JOBS_DB_KEY = 'WorklanceMockJobsDB';
+import { createBrowserClient } from '@supabase/ssr';
+import { Loader2 } from "lucide-react";
 
 const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters").max(100),
@@ -48,6 +48,7 @@ export default function PostJobPage() {
   const router = useRouter();
   const [currentSkill, setCurrentSkill] = useState(""); 
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof jobSchema>>({
     resolver: zodResolver(jobSchema),
     defaultValues: {
@@ -62,6 +63,11 @@ export default function PostJobPage() {
     },
   });
 
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const handleAddSkill = (field: any) => {
     const skillToAdd = currentSkill.trim().toLowerCase();
     if (skillToAdd && !field.value.map((s: string) => s.toLowerCase()).includes(skillToAdd)) {
@@ -75,29 +81,31 @@ export default function PostJobPage() {
   };
 
 
-  function onSubmit(values: z.infer<typeof jobSchema>) {
-    console.log("Form values:", values);
-    const newJob: Job = {
-      id: `job-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      title: values.title,
-      description: values.description,
-      // For mock, we can derive category name from id. A real app might fetch this.
-      category: { id: values.category, name: values.category.charAt(0).toUpperCase() + values.category.slice(1).replace(/_/g, ' ') },
-      type: values.type as "online" | "offline" | "hybrid",
-      location: values.location || (values.type === "online" ? "Remote" : undefined),
-      budget: values.budget,
-      skillsRequired: values.skillsRequired || [],
-      createdAt: new Date().toISOString(),
-      postedBy: { id: "clientUser123", name: "Demo Client Inc.", avatarUrl: "https://dummyimage.com/40x40.png/eeeeee/333333&text=DC" }, // Mock client
-      status: "open",
-      deadline: values.deadline ? values.deadline.toISOString() : undefined,
-    };
-
+  async function onSubmit(values: z.infer<typeof jobSchema>) {
+    setIsSubmitting(true);
     try {
-      const storedJobsRaw = localStorage.getItem(JOBS_DB_KEY);
-      let allJobs: Job[] = storedJobsRaw ? JSON.parse(storedJobsRaw) : [];
-      allJobs.unshift(newJob); // Add to the beginning to see it easily
-      localStorage.setItem(JOBS_DB_KEY, JSON.stringify(allJobs));
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast({ title: "Error", description: "You must be logged in to post a job.", variant: "destructive" });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { error } = await supabase.from('jobs').insert({
+        title: values.title,
+        description: values.description,
+        type: values.type,
+        category: values.category,
+        location: values.location,
+        budget: values.budget,
+        skills_required: values.skillsRequired,
+        deadline: values.deadline ? values.deadline.toISOString() : null,
+        employer_id: user.id,
+        status: "open",
+      });
+
+      if (error) throw error;
 
       toast({
         title: "Job Posted!",
@@ -105,25 +113,27 @@ export default function PostJobPage() {
       });
       form.reset(); 
       setCurrentSkill(""); 
-      // router.push('/jobs'); // Optional: redirect to job listings
+      router.push('/dashboard/client'); 
     } catch (error) {
-      console.error("Failed to save job to localStorage:", error);
+      console.error("Failed to save job to Supabase:", error);
       toast({
         title: "Error",
         description: "Could not save job posting. Please try again.",
         variant: "destructive",
       });
+    } finally {
+       setIsSubmitting(false);
     }
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4">
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Post a New Job</CardTitle>
-          <CardDescription>Fill in the details below to find the perfect student talent.</CardDescription>
+    <div className="flex flex-col items-center justify-center py-12 px-4 bg-gradient-to-br from-indigo-50/40 via-white to-violet-50/40 min-h-[calc(100vh-5rem)]">
+      <Card className="w-full max-w-2xl shadow-xl rounded-[1.5rem] border-white/50 bg-white/80 backdrop-blur-xl">
+        <CardHeader className="text-center pt-8">
+          <CardTitle className="text-3xl font-bold text-gray-900">Post a New Job</CardTitle>
+          <CardDescription className="text-base text-gray-500 mt-2">Fill in the details below to find the perfect student talent.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-8 pb-8">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
@@ -371,7 +381,9 @@ export default function PostJobPage() {
                 )}
               />
               
-              <Button type="submit" size="lg" className="w-full">Post Job</Button>
+              <Button type="submit" size="lg" className="w-full h-14 rounded-xl text-lg font-bold bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-200 transition-all text-white" disabled={isSubmitting}>
+                  {isSubmitting ? <><Loader2 className="mr-2 h-5 w-5 animate-spin"/> Posting...</> : "Post Job"}
+              </Button>
             </form>
           </Form>
         </CardContent>

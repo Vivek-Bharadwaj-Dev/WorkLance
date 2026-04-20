@@ -23,10 +23,12 @@ export async function GET(request: Request) {
     )
     
     // Exchange the code for a session
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+      const role = data.session?.user?.user_metadata?.role || 'student';
+      const actualNext = next === '/' ? `/dashboard/${role}` : next;
+      return NextResponse.redirect(`${origin}${actualNext}`)
     }
   }
 

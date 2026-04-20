@@ -29,9 +29,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
-  if (pathname.startsWith('/dashboard')) {
-    return null;
-  }
+  // Header is now visible on dashboard routes too
 
   useEffect(() => {
     const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';

@@ -1,157 +1,53 @@
-
 "use client";
 
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { clientDashboardLinks, CHAT_ID_SEPARATOR } from "@/lib/constants";
-import { Eye, CheckCircle, XCircle, MessageSquare } from "lucide-react";
+import { MessageSquare, Eye, CheckCircle, XCircle, User } from "lucide-react";
 import Link from "next/link";
-import type { Application } from "@/types";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
-
-// Mock Data
-const MOCK_APPLICATIONS: Application[] = [
-  {
-    id: "app1",
-    jobId: "job1",
-    jobTitle: "Frontend Developer for E-commerce Site",
-    student: { id: "student1@example.com", name: "Alice Wonderland", avatarUrl: "https://dummyimage.com/40x40.png/eeeeee/333333" },
-    proposal: "I am very interested in this opportunity and have relevant experience...",
-    status: "pending",
-    submittedAt: new Date(Date.now() - 86400000 * 1).toISOString(), // 1 day ago
-  },
-  {
-    id: "app2",
-    jobId: "job1",
-    jobTitle: "Frontend Developer for E-commerce Site",
-    student: { id: "student2@example.com", name: "Bob The Builder", avatarUrl: "https://dummyimage.com/40x40.png/eeeeee/333333" },
-    proposal: "My skills in React and Next.js make me a great fit for this role...",
-    status: "accepted",
-    submittedAt: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
-  },
-  {
-    id: "app3",
-    jobId: "job3",
-    jobTitle: "Social Media Manager",
-    student: { id: "student3@example.com", name: "Charlie Chaplin", avatarUrl: "https://dummyimage.com/40x40.png/eeeeee/333333" },
-    proposal: "I can help grow your social media presence effectively...",
-    status: "rejected",
-    submittedAt: new Date(Date.now() - 86400000 * 0.5).toISOString(), // 12 hours ago
-  },
-];
-
-// Helper function to generate chat ID
-const generateChatId = (email1: string, email2: string): string => {
-  const sortedEmails = [email1.toLowerCase(), email2.toLowerCase()].sort();
-  return sortedEmails.join(CHAT_ID_SEPARATOR);
-};
-
 
 export default function ClientApplicationsPage() {
-  const router = useRouter();
-  const { toast } = useToast();
-
-  const handleMessageStudent = (studentEmailToMessage: string) => {
-    const currentUserEmail = localStorage.getItem('userEmail');
-
-    if (!currentUserEmail || currentUserEmail.trim() === '' || !currentUserEmail.includes('@')) {
-      toast({
-        title: "Login Required / Invalid User Email",
-        description: "Please ensure you are logged in with a valid email to message students.",
-        variant: "destructive",
-      });
-      if (!currentUserEmail) router.push('/login?redirect=/dashboard/client/applications');
-      return;
-    }
-    if (!studentEmailToMessage || studentEmailToMessage.trim() === '' || !studentEmailToMessage.includes('@')) {
-      console.error("Student email is missing or invalid for chat:", studentEmailToMessage);
-      toast({
-        title: "Error Initiating Chat",
-        description: "Could not initiate chat. Student identifier is invalid or missing.",
-        variant: "destructive",
-      });
-      return;
-    }
-    const chatId = generateChatId(currentUserEmail, studentEmailToMessage);
-    router.push(`/messages/${chatId}`);
-  };
+  const apps = [
+    { id: "a1", name: "Alice W.", job: "Frontend Dev", status: "Pending", date: "1 day ago" },
+    { id: "a2", name: "Bob B.", job: "Frontend Dev", status: "Accepted", date: "2 days ago" },
+  ];
 
   return (
-    <DashboardLayout navLinks={clientDashboardLinks} title="Manage Applications" description="Review student applications for your job posts.">
-      <Card>
-        <CardHeader>
-          <CardTitle>Received Applications</CardTitle>
-          <CardDescription>
-            Total of {MOCK_APPLICATIONS.length} application{MOCK_APPLICATIONS.length === 1 ? "" : "s"} received.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {MOCK_APPLICATIONS.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Job Title</TableHead>
-                  <TableHead>Submitted On</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {MOCK_APPLICATIONS.map((app) => (
-                  <TableRow key={app.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={app.student.avatarUrl} alt={app.student.name} data-ai-hint="person avatar" />
-                          <AvatarFallback>{app.student.name.substring(0,1).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <Link href={`/profile/${encodeURIComponent(app.student.id)}`} className="font-medium hover:underline">{app.student.name}</Link>
-                      </div>
-                    </TableCell>
-                    <TableCell className="truncate max-w-xs">{app.jobTitle}</TableCell>
-                    <TableCell>{new Date(app.submittedAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        app.status === 'pending' ? 'secondary' :
-                        app.status === 'accepted' ? 'default' :
-                        app.status === 'rejected' ? 'destructive' : 'outline'
-                      } className="capitalize bg-opacity-80">
-                        {app.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <Button variant="ghost" size="icon" title="View Application (not implemented)">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" title="Message Student" onClick={() => handleMessageStudent(app.student.id)}>
-                        <MessageSquare className="h-4 w-4" />
-                      </Button>
-                      {app.status === 'pending' && (
-                        <>
-                          <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700" title="Accept (not implemented)">
-                            <CheckCircle className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700" title="Reject (not implemented)">
-                            <XCircle className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">No applications received yet.</p>
-          )}
-        </CardContent>
-      </Card>
-    </DashboardLayout>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900">Applications</h2>
+        <p className="text-sm text-gray-500 mt-1">Review students who applied for your jobs.</p>
+      </div>
+
+      <div className="space-y-3">
+        {apps.map((app, i) => (
+          <div key={i} className="p-5 border border-gray-100 rounded-xl bg-white flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center">
+                <User className="h-5 w-5 text-gray-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">{app.name}</h3>
+                <p className="text-xs text-indigo-600 font-medium">{app.job}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                app.status === "Accepted" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+              }`}>
+                {app.status}
+              </span>
+              <div className="flex items-center gap-2">
+                <button className="p-1.5 text-gray-400 hover:text-indigo-600"><Eye className="h-4 w-4" /></button>
+                <button className="p-1.5 text-gray-400 hover:text-indigo-600"><MessageSquare className="h-4 w-4" /></button>
+                {app.status === "Pending" && (
+                  <div className="flex gap-1 pl-2 border-l border-gray-100 ml-1">
+                    <button className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded"><CheckCircle className="h-4 w-4" /></button>
+                    <button className="p-1.5 text-red-500 hover:bg-red-50 rounded"><XCircle className="h-4 w-4" /></button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

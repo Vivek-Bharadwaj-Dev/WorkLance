@@ -80,7 +80,7 @@ const HeroSection = () => {
 
       <div className="container-xl grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10 w-full">
         <motion.div 
-          initial="hidden" 
+          initial="visible" 
           animate="visible" 
           variants={staggerContainer}
           className="space-y-8"
@@ -122,7 +122,7 @@ const HeroSection = () => {
 
         {/* Eye-catching Hero UI Composition */}
         <motion.div 
-          initial={{ opacity: 0, x: 40 }}
+          initial={{ opacity: 1, x: 0 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           className="relative h-[550px] w-full hidden md:flex items-center justify-center p-4"
@@ -215,7 +215,7 @@ const GetStartedSection = () => (
     <div className="container-xl relative z-10">
       <div className="text-center mb-16">
         <motion.h2 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4"
@@ -223,7 +223,7 @@ const GetStartedSection = () => (
           A streamlined hiring process
         </motion.h2>
         <motion.p 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}

@@ -1,110 +1,56 @@
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { clientDashboardLinks } from "@/lib/constants";
-import { PlusCircle, Edit, Trash2, Eye } from "lucide-react";
+"use client";
+
+import { Briefcase, Eye, Edit, Trash2, PlusCircle } from "lucide-react";
 import Link from "next/link";
-import type { Job } from "@/types"; // Assuming Job type is defined
-
-// Mock Data
-const MOCK_CLIENT_JOBS: Job[] = [
-  {
-    id: "job1",
-    title: "Frontend Developer for E-commerce Site",
-    category: { id: "webdev", name: "Web Development" },
-    type: "online",
-    status: "open",
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(), // 3 days ago
-    postedBy: { id: "client1", name: "Client Name" }, // Simplified postedBy for this context
-    description: "Brief job description...",
-  },
-  {
-    id: "job2",
-    title: "UX Designer for Mobile App",
-    category: { id: "design", name: "UX Design" },
-    type: "online",
-    status: "closed", // Example of a closed job
-    createdAt: new Date(Date.now() - 86400000 * 10).toISOString(), // 10 days ago
-    postedBy: { id: "client1", name: "Client Name" },
-    description: "Brief job description...",
-  },
-  {
-    id: "job3",
-    title: "Social Media Manager",
-    category: { id: "marketing", name: "Digital Marketing" },
-    type: "online",
-    status: "in-progress",
-    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(), // 1 day ago
-    postedBy: { id: "client1", name: "Client Name" },
-    description: "Brief job description...",
-  },
-];
-
 
 export default function ClientManageJobsPage() {
+  const jobs = [
+    { id: "j1", title: "Frontend Developer", category: "Web Dev", status: "Open", date: "3 days ago" },
+    { id: "j2", title: "UX Designer", category: "Design", status: "Closed", date: "10 days ago" },
+  ];
+
   return (
-    <DashboardLayout navLinks={clientDashboardLinks} title="Manage Job Posts" description="View, edit, or delete your job listings.">
-      <div className="flex justify-end mb-6">
-        <Button asChild>
-          <Link href="/jobs/post"><PlusCircle className="mr-2 h-4 w-4" /> Post New Job</Link>
-        </Button>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Your Gigs</h2>
+          <p className="text-sm text-gray-500 mt-1">Manage all your active and past job postings.</p>
+        </div>
+        <Link
+          href="/jobs/post"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+        >
+          <PlusCircle className="h-4 w-4" /> Post New
+        </Link>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Job Listings</CardTitle>
-          <CardDescription>
-            You have {MOCK_CLIENT_JOBS.length} job post{MOCK_CLIENT_JOBS.length === 1 ? "" : "s"}.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {MOCK_CLIENT_JOBS.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Posted On</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {MOCK_CLIENT_JOBS.map((job) => (
-                  <TableRow key={job.id}>
-                    <TableCell className="font-medium">{job.title}</TableCell>
-                    <TableCell>{job.category.name}</TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        job.status === 'open' ? 'default' : 
-                        job.status === 'closed' ? 'outline' : 
-                        job.status === 'in-progress' ? 'secondary' : 'default'
-                      } className="capitalize">
-                        {job.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" asChild className="mr-1">
-                        <Link href={`/jobs/${job.id}`} title="View Job"><Eye className="h-4 w-4" /></Link>
-                      </Button>
-                       <Button variant="ghost" size="icon" asChild className="mr-1" title="Edit Job">
-                        <Link href={`/jobs/edit/${job.id}`}><Edit className="h-4 w-4" /></Link>
-                      </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" title="Delete Job">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">You haven't posted any jobs yet.</p>
-          )}
-        </CardContent>
-      </Card>
-    </DashboardLayout>
+
+      <div className="space-y-3">
+        {jobs.map((job) => (
+          <div key={job.id} className="p-5 border border-gray-100 rounded-xl bg-white flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-8 w-8 rounded bg-gray-50 flex items-center justify-center">
+                <Briefcase className="h-4 w-4 text-gray-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">{job.title}</h3>
+                <p className="text-xs text-gray-500">{job.category} • Posted {job.date}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                job.status === "Open" ? "bg-emerald-50 text-emerald-600" : "bg-gray-50 text-gray-500"
+              }`}>
+                {job.status}
+              </span>
+              <div className="flex items-center gap-2">
+                <Link href={`/jobs/${job.id}`} className="p-1.5 text-gray-400 hover:text-indigo-600"><Eye className="h-4 w-4" /></Link>
+                <Link href={`/jobs/edit/${job.id}`} className="p-1.5 text-gray-400 hover:text-indigo-600"><Edit className="h-4 w-4" /></Link>
+                <button className="p-1.5 text-gray-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

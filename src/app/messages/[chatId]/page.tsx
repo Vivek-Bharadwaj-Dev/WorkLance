@@ -11,10 +11,7 @@ import type { Message, User } from '@/types';
 import { Send, ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { CHAT_ID_SEPARATOR } from '@/lib/constants';
-
-const MESSAGES_DB_KEY = 'internaMockMessagesDB';
-const USERS_DB_KEY = 'internaMockUserDB';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function ChatPage() {
   const params = useParams();
@@ -30,84 +27,95 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const userEmailFromStorage = localStorage.getItem('userEmail');
-    if (!userEmailFromStorage) {
-      router.push(`/login?redirect=/messages/${chatId}`);
-      return;
-    }
-    const lowerUserEmail = userEmailFromStorage.toLowerCase();
-    setCurrentUserEmail(lowerUserEmail);
+    const fetchChat = async () => {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push(`/login?redirect=/messages/${chatId}`);
+        return;
+      }
+      setCurrentUserEmail(user.id);
 
-    if (!chatId || typeof chatId !== 'string') {
-        setError("Invalid chat ID provided in URL.");
+      const { data: convo, error } = await supabase
+        .from('conversations')
+        .select(`
+           *,
+           profiles!conversations_participant1_id_fkey (id, full_name, avatar_url),
+           profiles2:profiles!conversations_participant2_id_fkey (id, full_name, avatar_url)
+        `)
+        .eq('id', chatId)
+        .single();
+
+      if (error || !convo) {
+        setError("Chat not found!");
         setIsLoading(false);
         return;
-    }
+      }
 
-    const participantEmails = chatId.split(CHAT_ID_SEPARATOR);
-    if (participantEmails.length !== 2 || 
-        !participantEmails[0] || participantEmails[0].trim() === '' || !participantEmails[0].includes('@') ||
-        !participantEmails[1] || participantEmails[1].trim() === '' || !participantEmails[1].includes('@')
-    ) {
-        setError(`Invalid chat ID format. Chat ID should consist of two valid, non-empty emails separated by '${CHAT_ID_SEPARATOR}'. Received: ${chatId}`);
-        setIsLoading(false);
-        return;
-    }
+      const p1 = convo.profiles as any;
+      const p2 = (convo as any).profiles2 as any;
+      const otherProfile = convo.participant1_id === user.id ? p2 : p1;
 
-    const otherUserEmail = participantEmails.find(email => email.toLowerCase() !== lowerUserEmail);
+      setOtherParticipant({
+        id: otherProfile?.id || "unknown",
+        name: otherProfile?.full_name || "Unknown User",
+        avatarUrl: otherProfile?.avatar_url,
+      });
 
-    if (!otherUserEmail) {
-        setError("Could not determine the other participant in this chat. Ensure the chat ID is correct and you are part of this chat.");
-        setIsLoading(false);
-        return;
-    }
-
-    const storedUsersRaw = localStorage.getItem(USERS_DB_KEY);
-    const allUsers: Record<string, User & { name: string; avatarUrl?: string }> = storedUsersRaw ? JSON.parse(storedUsersRaw) : {};
-    const otherUserDetails = allUsers[otherUserEmail.toLowerCase()];
-
-    setOtherParticipant({
-      id: otherUserEmail.toLowerCase(),
-      name: otherUserDetails?.name || otherUserEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || "User",
-      avatarUrl: otherUserDetails?.avatarUrl,
-    });
-
-    const storedMessagesRaw = localStorage.getItem(MESSAGES_DB_KEY);
-    const allChats: Record<string, Message[]> = storedMessagesRaw ? JSON.parse(storedMessagesRaw) : {};
-    const chatMessages = allChats[chatId] || [];
-    setMessages(chatMessages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
-    setIsLoading(false);
+      const { data: msgs } = await supabase.from('messages').select('*').eq('conversation_id', chatId).order('created_at', { ascending: true });
+      if (msgs) {
+        setMessages(msgs.map(m => ({
+          id: m.id,
+          chatId,
+          senderId: m.sender_id,
+          receiverId: otherProfile?.id,
+          content: m.content,
+          timestamp: m.created_at,
+          isRead: true
+        })));
+      }
+      setIsLoading(false);
+    };
+    fetchChat();
   }, [chatId, router]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !currentUserEmail || !otherParticipant) return;
 
-    const messageToSend: Message = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      chatId,
-      senderId: currentUserEmail,
-      receiverId: otherParticipant.id,
-      content: newMessage.trim(),
-      timestamp: new Date().toISOString(),
-      isRead: false, 
-    };
+    const content = newMessage.trim();
+    setNewMessage('');
 
     try {
-      const storedMessagesRaw = localStorage.getItem(MESSAGES_DB_KEY);
-      let allChats: Record<string, Message[]> = storedMessagesRaw ? JSON.parse(storedMessagesRaw) : {};
-      if (!allChats[chatId]) {
-        allChats[chatId] = [];
-      }
-      allChats[chatId].push(messageToSend);
-      localStorage.setItem(MESSAGES_DB_KEY, JSON.stringify(allChats));
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      const { data: newMsg, error } = await supabase.from('messages').insert({
+        conversation_id: chatId,
+        sender_id: currentUserEmail,
+        content: content
+      }).select().single();
 
-      setMessages(prevMessages => [...prevMessages, messageToSend].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()));
-      setNewMessage('');
+      if (error) throw error;
+
+      setMessages(prev => [...prev, {
+        id: newMsg.id,
+        chatId,
+        senderId: currentUserEmail,
+        receiverId: otherParticipant.id,
+        content: content,
+        timestamp: newMsg.created_at,
+        isRead: false
+      }]);
     } catch (err) {
         console.error("Failed to send message:", err);
         setError("Could not send message. Please try again.");
@@ -165,13 +173,13 @@ export default function ChatPage() {
               key={msg.id}
               className={cn(
                 "flex items-end space-x-2 max-w-[80%]",
-                msg.senderId.toLowerCase() === currentUserEmail ? "ml-auto flex-row-reverse space-x-reverse" : "mr-auto"
+                msg.senderId === currentUserEmail ? "ml-auto flex-row-reverse space-x-reverse" : "mr-auto"
               )}
             >
               <div
                 className={cn(
                   "p-2.5 rounded-xl text-sm shadow",
-                  msg.senderId.toLowerCase() === currentUserEmail
+                  msg.senderId === currentUserEmail
                     ? "bg-primary text-primary-foreground rounded-br-none"
                     : "bg-card text-card-foreground border border-border/50 rounded-bl-none"
                 )}
@@ -179,7 +187,7 @@ export default function ChatPage() {
                 <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                 <p className={cn(
                     "text-xs mt-1",
-                    msg.senderId.toLowerCase() === currentUserEmail ? "text-primary-foreground/70 text-right" : "text-muted-foreground/80 text-left"
+                    msg.senderId === currentUserEmail ? "text-primary-foreground/70 text-right" : "text-muted-foreground/80 text-left"
                     )}
                 >
                     {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

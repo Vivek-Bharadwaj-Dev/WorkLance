@@ -13,44 +13,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useToast } from '@/hooks/use-toast';
 import { CHAT_ID_SEPARATOR } from '@/lib/constants';
+import { createBrowserClient } from '@supabase/ssr';
 
-const JOBS_DB_KEY = 'internaMockJobsDB';
 
-const MOCK_JOBS_INITIAL_SEED: Job[] = [
-   {
-    id: "1",
-    title: "Graphic Designer for Local Cafe Branding",
-    description: "We're looking for a creative student to design a new logo, menu, and promotional materials for our cafe. Responsibilities include: collaborating with the owner on concepts, delivering print-ready files, and iterating based on feedback. This is a great opportunity to build your portfolio with a real-world project. Please include a link to your portfolio in your application.",
-    category: { id: "design", name: "Graphic Design" },
-    type: "offline",
-    postedBy: { id: "client1@example.com", name: "The Cozy Corner Cafe", avatarUrl: "https://dummyimage.com/80x80.png/eeeeee/333333&text=CC", whatsappNumber: "+15551234567" },
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    deadline: new Date(Date.now() + 86400000 * 12).toISOString(),
-    location: "123 University Ave, Downtown Campus",
-    budget: 300,
-    skillsRequired: ["Adobe Illustrator", "Photoshop", "Branding", "Typography", "Print Design"],
-    status: "open",
-  },
-  {
-    id: "2",
-    title: "Build a Responsive E-commerce Website",
-    description: "Seeking a talented web development student to build a fully responsive e-commerce site for our new handmade crafts business. The project involves front-end and back-end development, payment gateway integration, and ensuring a seamless user experience. Experience with Shopify or WooCommerce is a plus. We're looking for someone proactive and communicative.",
-    category: { id: "webdev", name: "Web Development" },
-    type: "online",
-    postedBy: { id: "client2@example.com", name: "Artisan Goods Co.", avatarUrl: "https://dummyimage.com/80x80.png/eeeeee/333333&text=AG", whatsappNumber: "+15557654321" },
-    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-    location: "Remote",
-    skillsRequired: ["HTML5", "CSS3", "JavaScript (ES6+)", "React", "Node.js", "Express.js", "MongoDB", "REST APIs", "Git"],
-    budget: 850,
-    status: "open",
-  },
-];
 
-// Helper function to generate chat ID
-const generateChatId = (email1: string, email2: string): string => {
-  const sortedEmails = [email1.toLowerCase(), email2.toLowerCase()].sort();
-  return sortedEmails.join(CHAT_ID_SEPARATOR);
-};
+
 
 export default function JobDetailsPage() {
   const params = useParams();
@@ -65,32 +32,59 @@ export default function JobDetailsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const CUE = localStorage.getItem('userEmail');
-    if (CUE) {
-        setLoggedInUserEmail(CUE.toLowerCase());
-    }
+    const initializeData = async () => {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
 
-    if (jobId) {
-      setIsLoading(true);
-      let allJobs: Job[] = [];
-      const storedJobsRaw = localStorage.getItem(JOBS_DB_KEY);
-      if (storedJobsRaw) {
-        try {
-          allJobs = JSON.parse(storedJobsRaw);
-        } catch (e) {
-          console.error("Error parsing jobs from localStorage", e);
-          allJobs = MOCK_JOBS_INITIAL_SEED; 
-        }
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user?.email) {
+        setLoggedInUserEmail(userData.user.email.toLowerCase());
       } else {
-        allJobs = MOCK_JOBS_INITIAL_SEED; 
+        const localEmail = localStorage.getItem('userEmail');
+        if (localEmail) setLoggedInUserEmail(localEmail.toLowerCase());
       }
 
-      setTimeout(() => {
-        const foundJob = allJobs.find(j => j.id === jobId);
-        setJob(foundJob || null);
+      if (jobId) {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('jobs')
+          .select(`
+            *,
+            profiles:employer_id (id, full_name, avatar_url, whatsapp_number)
+          `)
+          .eq('id', jobId)
+          .single();
+
+        if (data) {
+          const mappedJob: Job = {
+            id: data.id,
+            title: data.title,
+            description: data.description,
+            category: { id: data.category || 'other', name: data.category || 'Other' },
+            type: data.type || 'online',
+            postedBy: { 
+              id: data.employer_id, 
+              name: data.profiles?.full_name || 'Employer', 
+              avatarUrl: data.profiles?.avatar_url || '',
+              whatsappNumber: data.profiles?.whatsapp_number
+            },
+            createdAt: data.created_at,
+            deadline: data.deadline,
+            location: data.location,
+            budget: data.budget,
+            skillsRequired: data.skills_required || [],
+            status: data.status || 'open'
+          };
+          setJob(mappedJob);
+        } else {
+          setJob(null);
+        }
         setIsLoading(false);
-      }, 500);
-    }
+      }
+    };
+    initializeData();
   }, [jobId]);
 
   const handleClientWhatsAppContact = () => {
@@ -100,41 +94,58 @@ export default function JobDetailsPage() {
     }
   };
 
-  const handleMessageClient = () => {
-    const currentLoggedInUserEmail = localStorage.getItem('userEmail'); // Re-fetch to ensure freshness
-    const clientEmailToMessage = job?.postedBy.id;
-
-    if (!currentLoggedInUserEmail || currentLoggedInUserEmail.trim() === '' || !currentLoggedInUserEmail.includes('@')) {
+  const handleMessageClient = async () => {
+    if (!loggedInUserEmail) {
        toast({
-        title: "Login Required / Invalid User Email",
-        description: "Please ensure you are logged in with a valid email to message the client.",
+        title: "Login Required",
+        description: "Please log in to message the client.",
         variant: "destructive",
       });
-      if (!currentLoggedInUserEmail) router.push(`/login?redirect=${pathname}`);
+      router.push(`/login?redirect=${pathname}`);
       return;
     }
-    if (!clientEmailToMessage || clientEmailToMessage.trim() === '' || !clientEmailToMessage.includes('@')) { 
-      console.error("Client email (job.postedBy.id) is missing or invalid for chat:", clientEmailToMessage);
-      toast({
-        title: "Error Initiating Chat",
-        description: "Could not initiate chat. Client identifier is invalid or missing.",
-        variant: "destructive",
-      });
-      return;
+
+    const clientId = job?.postedBy.id;
+    if (!clientId) return;
+
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      if (user.id === clientId) {
+        toast({ title: "Action Not Available", description: "You cannot message yourself.", variant: "default" });
+        return;
+      }
+
+      let { data: convo } = await supabase.from('conversations')
+        .select('id')
+        .or(`and(participant1_id.eq.${user.id},participant2_id.eq.${clientId}),and(participant1_id.eq.${clientId},participant2_id.eq.${user.id})`)
+        .maybeSingle();
+
+      if (!convo) {
+        const { data: newConvo } = await supabase.from('conversations').insert({
+          participant1_id: user.id,
+          participant2_id: clientId,
+          job_id: job?.id
+        }).select().single();
+        convo = newConvo;
+      }
+      
+      if (convo) {
+        router.push(`/messages/${convo.id}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error", description: "Could not start conversation.", variant: "destructive" });
     }
-    if (currentLoggedInUserEmail.toLowerCase() === clientEmailToMessage.toLowerCase()) {
-      toast({
-        title: "Action Not Available",
-        description: "You cannot message yourself regarding your own job post.",
-        variant: "default",
-      });
-      return;
-    }
-    const chatId = generateChatId(currentLoggedInUserEmail, clientEmailToMessage);
-    router.push(`/messages/${chatId}`);
   };
 
-  const handleApply = () => {
+  const handleApply = async () => {
     if (!loggedInUserEmail) {
       toast({
         title: "Login Required",
@@ -146,16 +157,41 @@ export default function JobDetailsPage() {
     }
     
     setIsApplying(true);
-    // Mock application process
-    setTimeout(() => {
-      setIsApplying(false);
+    
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase.from('applications').insert({
+        job_id: job?.id,
+        student_id: user.id,
+        status: 'pending'
+      });
+
+      if (error) throw error;
+
       setHasApplied(true);
       toast({
         title: "Application Submitted!",
         description: "The client will be able to review your profile and proposal.",
         variant: "default",
       });
-    }, 1500);
+      router.push('/dashboard/student');
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Application Failed",
+        description: "Could not submit your application. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsApplying(false);
+    }
   };
 
   const isOwnJobPost = loggedInUserEmail && job && job.postedBy.id.toLowerCase() === loggedInUserEmail;

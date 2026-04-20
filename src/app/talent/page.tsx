@@ -10,12 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Filter, Search, Users, BriefcaseBusiness, UserSearch, UserX } from "lucide-react"; 
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import { createBrowserClient } from '@supabase/ssr';
 
 const ITEMS_PER_PAGE = 9;
-const USER_DB_KEY = 'WorklanceMockUserDB';
-
-const MOCK_STUDENTS_INITIAL_SEED: StudentProfile[] = [];
-
 
 export default function TalentPage() {
   const [allTalent, setAllTalent] = useState<StudentProfile[]>([]);
@@ -29,48 +26,38 @@ export default function TalentPage() {
   const [displayedTalentCount, setDisplayedTalentCount] = useState(ITEMS_PER_PAGE);
 
   useEffect(() => {
-    let talentFromStorage: StudentProfile[] = [];
-    const storedUsersRaw = localStorage.getItem(USER_DB_KEY);
-
-    if (storedUsersRaw) {
-      try {
-        const storedUsers = JSON.parse(storedUsersRaw);
-        talentFromStorage = Object.entries(storedUsers)
-          .filter(([, userData]: [string, any]) => userData.role === 'student')
-          .map(([emailKey, studentData]: [string, any]) => {
-            const lowerCaseEmailKey = emailKey.toLowerCase();
-            return {
-              userId: lowerCaseEmailKey,
-              name: studentData.name || studentData.email?.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) || "Student User",
-              avatarUrl: studentData.avatarUrl || `https://dummyimage.com/80x80.png/eeeeee/333333&text=${(studentData.name || lowerCaseEmailKey).substring(0,1).toUpperCase()}`,
-              headline: studentData.headline || "Passionate student looking for opportunities",
-              skills: Array.isArray(studentData.skills) ? studentData.skills : [],
-              course: studentData.course || "",
-              location: studentData.location || "University Town, USA",
-              rating: studentData.rating ? parseFloat(String(studentData.rating)) : parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
-              completedJobs: studentData.completedJobs ? parseInt(String(studentData.completedJobs), 10) : Math.floor(Math.random() * 10),
-              hourlyRate: studentData.hourlyRate ? parseFloat(String(studentData.hourlyRate)) : undefined,
-              bio: studentData.bio || "A dedicated and enthusiastic student.",
-              portfolio: Array.isArray(studentData.portfolio) ? studentData.portfolio : [],
-              education: Array.isArray(studentData.education) ? studentData.education : [],
-              experience: Array.isArray(studentData.experience) ? studentData.experience : [],
-              universityRollNo: studentData.universityRollNo || "",
-              whatsappNumber: studentData.whatsappNumber || "",
-              email: lowerCaseEmailKey, 
-              createdAt: studentData.createdAt, // Include createdAt
-            };
-          });
-      } catch (e) {
-        console.error("Error parsing users from localStorage for talent page", e);
-        talentFromStorage = [];
+    const fetchTalent = async () => {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data, error } = await supabase.from('profiles').select('*').eq('role', 'student').order('created_at', { ascending: false });
+      
+      if (data) {
+        const mappedData: StudentProfile[] = data.map((studentData: any) => ({
+          userId: studentData.id,
+          name: studentData.full_name || studentData.email?.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) || "Student User",
+          avatarUrl: studentData.avatar_url || `https://dummyimage.com/80x80.png/eeeeee/333333&text=${(studentData.full_name || "S").substring(0,1).toUpperCase()}`,
+          headline: studentData.headline || "Passionate student looking for opportunities",
+          skills: Array.isArray(studentData.skills) ? studentData.skills : [],
+          course: studentData.course || "",
+          location: studentData.location || "Default Location",
+          rating: studentData.rating ? parseFloat(String(studentData.rating)) : parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
+          completedJobs: studentData.completed_jobs ? parseInt(String(studentData.completed_jobs), 10) : 0,
+          hourlyRate: studentData.hourly_rate ? parseFloat(String(studentData.hourly_rate)) : undefined,
+          bio: studentData.bio || "A dedicated and enthusiastic student.",
+          portfolio: Array.isArray(studentData.portfolio) ? studentData.portfolio : [],
+          education: Array.isArray(studentData.education) ? studentData.education : [],
+          experience: Array.isArray(studentData.experience) ? studentData.experience : [],
+          universityRollNo: studentData.university_roll_no || "",
+          whatsappNumber: studentData.whatsapp_number || "",
+          email: studentData.email, 
+          createdAt: studentData.created_at,
+        }));
+        setAllTalent(mappedData);
       }
-    }
-
-    if (talentFromStorage.length > 0) {
-        setAllTalent(talentFromStorage);
-    } else {
-      setAllTalent(MOCK_STUDENTS_INITIAL_SEED);
-    }
+    };
+    fetchTalent();
   }, []);
 
 

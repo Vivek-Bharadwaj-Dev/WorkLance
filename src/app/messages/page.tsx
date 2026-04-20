@@ -9,9 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import type { ChatSummary, Message, User } from '@/types';
 import { AlertTriangle, Inbox, Loader2 } from 'lucide-react';
-
-const MESSAGES_DB_KEY = 'WorklanceMockMessagesDB';
-const USERS_DB_KEY = 'WorklanceMockUserDB';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function MessagesPage() {
   const [chatSummaries, setChatSummaries] = useState<ChatSummary[]>([]);
@@ -21,51 +19,73 @@ export default function MessagesPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const userEmail = localStorage.getItem('userEmail');
-    if (!userEmail) {
-      router.push('/login?redirect=/messages');
-      return;
-    }
-    setCurrentUserEmail(userEmail.toLowerCase());
-
-    // Simulate loading
-    setTimeout(() => {
+    const fetchConversations = async () => {
       try {
-        const storedUsersRaw = localStorage.getItem(USERS_DB_KEY);
-        const allUsers: Record<string, User & { name: string; avatarUrl?: string }> = storedUsersRaw ? JSON.parse(storedUsersRaw) : {};
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.push('/login?redirect=/messages');
+          return;
+        }
+        setCurrentUserEmail(user.id);
 
-        const storedMessagesRaw = localStorage.getItem(MESSAGES_DB_KEY);
-        const allChats: Record<string, Message[]> = storedMessagesRaw ? JSON.parse(storedMessagesRaw) : {};
+        const { data: convos, error } = await supabase
+          .from('conversations')
+          .select(`
+             id,
+             participant1_id,
+             participant2_id,
+             profiles!conversations_participant1_id_fkey (id, full_name, avatar_url),
+             profiles2:profiles!conversations_participant2_id_fkey (id, full_name, avatar_url)
+          `);
 
+        if (error) throw error;
+        
         const summaries: ChatSummary[] = [];
 
-        for (const chatId in allChats) {
-          if (chatId.toLowerCase().includes(userEmail.toLowerCase())) {
-            const messages = allChats[chatId];
-            if (messages.length === 0) continue;
+        if (convos) {
+          for (const convo of convos) {
+            // Because postgREST handles the two foreign keys, standard query output looks somewhat complex,
+            // we will fetch using a simpler trick or just assume we have it:
+            // Workaround logic for mapped columns:
+            const p1 = convo.profiles as any;
+            const p2 = (convo as any).profiles2 as any;
+            const otherProfile = convo.participant1_id === user.id ? p2 : p1;
+            
+            const otherParticipant = {
+              id: otherProfile?.id || (convo.participant1_id === user.id ? convo.participant2_id : convo.participant1_id),
+              name: otherProfile?.full_name || "Unknown User",
+              avatarUrl: otherProfile?.avatar_url,
+            };
 
-            const participantEmails = chatId.split('_');
-            const otherParticipantEmail = participantEmails.find(email => email.toLowerCase() !== userEmail.toLowerCase());
+            const { data: msgs } = await supabase
+              .from('messages')
+              .select('*')
+              .eq('conversation_id', convo.id)
+              .order('created_at', { ascending: false })
+              .limit(1);
 
-            if (otherParticipantEmail) {
-              const otherUserDetails = allUsers[otherParticipantEmail.toLowerCase()]; // Ensure lookup is also case-insensitive
-              const otherParticipant = {
-                id: otherParticipantEmail,
-                name: otherUserDetails?.name || otherParticipantEmail.split('@')[0] || "Unknown User",
-                avatarUrl: otherUserDetails?.avatarUrl,
-              };
+            const lastMessage = msgs?.[0] ? {
+               id: msgs[0].id,
+               chatId: convo.id,
+               senderId: msgs[0].sender_id,
+               receiverId: otherParticipant.id,
+               content: msgs[0].content,
+               timestamp: msgs[0].created_at,
+               isRead: true
+            } : null;
 
-              const lastMessage = messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
-
-              summaries.push({
-                chatId,
-                otherParticipant,
-                lastMessage,
-              });
-            }
+            summaries.push({
+              chatId: convo.id,
+              otherParticipant,
+              lastMessage,
+            });
           }
         }
-
+        
         summaries.sort((a, b) => {
           if (!a.lastMessage) return 1;
           if (!b.lastMessage) return -1;
@@ -74,11 +94,13 @@ export default function MessagesPage() {
 
         setChatSummaries(summaries);
       } catch (e) {
-        console.error("Error processing message data:", e);
-        setError("Failed to load conversations. Data might be corrupted.");
+        console.error("Error fetching conversations", e);
+        setError("Failed to load conversations.");
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }, 500);
+    };
+    fetchConversations();
   }, [router]);
 
   if (isLoading) {
@@ -137,7 +159,7 @@ export default function MessagesPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-foreground truncate">{chat.otherParticipant.name}</p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {chat.lastMessage?.senderId.toLowerCase() === currentUserEmail ? "You: " : ""}
+                          {chat.lastMessage?.senderId === currentUserEmail ? "You: " : ""}
                           {chat.lastMessage?.content || "No messages yet."}
                         </p>
                       </div>

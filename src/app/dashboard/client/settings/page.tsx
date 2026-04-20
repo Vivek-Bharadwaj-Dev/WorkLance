@@ -1,184 +1,168 @@
-
 "use client";
 
-import React from "react"; // Added React import
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { clientDashboardLinks } from "@/lib/constants";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Building, Bell, Palette, UserCog, Languages, SunMoon } from "lucide-react";
+import { Bell, Building, Palette, Lock, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function ClientSettingsPage() {
-  // In a real app, these would come from user state or a theme context
   const [currentTheme, setCurrentTheme] = React.useState("system");
   const [currentLanguage, setCurrentLanguage] = React.useState("en");
 
   return (
-    <DashboardLayout navLinks={clientDashboardLinks} title="Settings" description="Manage your company profile, account, and preferences.">
-      <div className="space-y-8">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <UserCog className="h-6 w-6 text-primary" />
-              <CardTitle>Account Management</CardTitle>
-            </div>
-            <CardDescription>Update your personal information and account security.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-             <div className="space-y-2">
-              <Label htmlFor="current-password">Current Password</Label>
-              <Input id="current-password" type="password" placeholder="Enter current password" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-password">New Password</Label>
-              <Input id="new-password" type="password" placeholder="Enter new password" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm New Password</Label>
-              <Input id="confirm-password" type="password" placeholder="Confirm new password" />
-            </div>
-            <Button>Change Password</Button>
-            <Separator />
-            <p className="text-sm text-muted-foreground">Email Preferences: client@example.com (Not editable)</p>
-            <Button variant="destructive" disabled>Delete Account (Coming Soon)</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-             <div className="flex items-center gap-2">
-              <Building className="h-6 w-6 text-primary" />
-              <CardTitle>Company Profile</CardTitle>
-            </div>
-            <CardDescription>Manage your organization's details.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground">Placeholder for company name, logo upload, description etc.</p>
-            <Button variant="outline" asChild>
-                <Link href="#">Edit Company Profile (Coming Soon)</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-             <div className="flex items-center gap-2">
-              <Bell className="h-6 w-6 text-primary" />
-              <CardTitle>Notification Preferences</CardTitle>
-            </div>
-            <CardDescription>Choose how you want to be notified by Worklance.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="new-applications" className="flex flex-col space-y-1">
-                <span>New Applications Received</span>
-                 <span className="font-normal leading-snug text-muted-foreground">
-                  Get an email when a student applies to your job post.
-                </span>
-              </Label>
-              <Switch id="new-applications" defaultChecked />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <Label htmlFor="message-notifications-client" className="flex flex-col space-y-1">
-                <span>New Messages from Students</span>
-                 <span className="font-normal leading-snug text-muted-foreground">
-                  Receive notifications for new messages regarding your projects.
-                </span>
-              </Label>
-              <Switch id="message-notifications-client" defaultChecked />
-            </div>
-             <Separator />
-            <div className="flex items-center justify-between">
-              <Label htmlFor="project-updates" className="flex flex-col space-y-1">
-                <span>Project Milestone Updates</span>
-                 <span className="font-normal leading-snug text-muted-foreground">
-                  Be informed about progress on your active projects.
-                </span>
-              </Label>
-              <Switch id="project-updates" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-             <div className="flex items-center gap-2">
-              <Palette className="h-6 w-6 text-primary" />
-              <CardTitle>Appearance</CardTitle>
-            </div>
-            <CardDescription>Customize the look and feel of the Worklance platform.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 mb-2">
-                <SunMoon className="h-5 w-5 text-muted-foreground" />
-                <Label>Theme</Label>
-              </div>
-              <RadioGroup 
-                defaultValue={currentTheme} 
-                onValueChange={setCurrentTheme} 
-                className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-              >
-                <div>
-                  <RadioGroupItem value="light" id="client-theme-light" className="peer sr-only" />
-                  <Label
-                    htmlFor="client-theme-light"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    Light
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem value="dark" id="client-theme-dark" className="peer sr-only" />
-                  <Label
-                    htmlFor="client-theme-dark"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    Dark
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem value="system" id="client-theme-system" className="peer sr-only" />
-                  <Label
-                    htmlFor="client-theme-system"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    System
-                  </Label>
-                </div>
-              </RadioGroup>
-              <p className="text-xs text-muted-foreground">Actual theme switching logic needs to be implemented.</p>
-            </div>
-            <Separator />
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 mb-2">
-                <Languages className="h-5 w-5 text-muted-foreground" />
-                <Label htmlFor="client-language-select">Language</Label>
-              </div>
-              <Select defaultValue={currentLanguage} onValueChange={setCurrentLanguage}>
-                <SelectTrigger id="client-language-select" className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="es">Español (Spanish)</SelectItem>
-                  <SelectItem value="fr">Français (French)</SelectItem>
-                  <SelectItem value="de">Deutsch (German)</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">Full Worklancetionalization (i18n) support needs to be implemented.</p>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-6 max-w-3xl">
+      <div>
+        <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Settings</h2>
+        <p className="text-gray-400 text-sm mt-1 font-medium">Manage your company profile, account, and preferences.</p>
       </div>
-    </DashboardLayout>
+
+      {/* Account Security */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center">
+            <Lock className="h-4 w-4 text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900">Account Security</h3>
+            <p className="text-[11px] text-gray-400">Update your password and security settings</p>
+          </div>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="current-password" className="text-xs font-semibold text-gray-600">Current Password</Label>
+            <Input id="current-password" type="password" placeholder="Enter current password" className="rounded-xl border-gray-200 h-10" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-password" className="text-xs font-semibold text-gray-600">New Password</Label>
+              <Input id="new-password" type="password" placeholder="Enter new password" className="rounded-xl border-gray-200 h-10" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password" className="text-xs font-semibold text-gray-600">Confirm Password</Label>
+              <Input id="confirm-password" type="password" placeholder="Confirm new password" className="rounded-xl border-gray-200 h-10" />
+            </div>
+          </div>
+          <Button className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl shadow-md shadow-indigo-200 hover:shadow-lg text-xs font-bold px-6">
+            Update Password
+          </Button>
+        </div>
+      </div>
+
+      {/* Company Profile */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center">
+            <Building className="h-4 w-4 text-violet-600" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900">Company Profile</h3>
+            <p className="text-[11px] text-gray-400">Manage your organization&apos;s details</p>
+          </div>
+        </div>
+        <div className="p-6">
+          <p className="text-xs text-gray-500 mb-3">Add your company name, logo, and description to attract top talent.</p>
+          <Button variant="outline" className="rounded-xl text-xs font-bold border-gray-200" asChild>
+            <Link href="#">Edit Company Profile (Coming Soon)</Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Notifications */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center">
+            <Bell className="h-4 w-4 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
+            <p className="text-[11px] text-gray-400">Choose how you want to be notified</p>
+          </div>
+        </div>
+        <div className="divide-y divide-gray-50">
+          {[
+            { id: "new-apps", label: "New Applications", desc: "Email when a student applies to your job post", defaultChecked: true },
+            { id: "msg-notif-client", label: "Messages from Students", desc: "Notifications for new messages regarding projects", defaultChecked: true },
+            { id: "project-updates", label: "Project Milestones", desc: "Updates on progress of your active projects", defaultChecked: false },
+          ].map((item) => (
+            <div key={item.id} className="flex items-center justify-between px-6 py-4">
+              <div>
+                <p className="text-sm font-semibold text-gray-800">{item.label}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{item.desc}</p>
+              </div>
+              <Switch id={item.id} defaultChecked={item.defaultChecked} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Appearance */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
+            <Palette className="h-4 w-4 text-amber-600" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900">Appearance</h3>
+            <p className="text-[11px] text-gray-400">Customize your experience</p>
+          </div>
+        </div>
+        <div className="p-6 space-y-6">
+          <div>
+            <Label className="text-xs font-semibold text-gray-600 mb-3 block">Theme</Label>
+            <RadioGroup defaultValue={currentTheme} onValueChange={setCurrentTheme} className="grid grid-cols-3 gap-3">
+              {["light", "dark", "system"].map((theme) => (
+                <div key={theme}>
+                  <RadioGroupItem value={theme} id={`client-theme-${theme}`} className="peer sr-only" />
+                  <Label
+                    htmlFor={`client-theme-${theme}`}
+                    className="flex items-center justify-center rounded-xl border-2 border-gray-100 p-3 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-50 peer-data-[state=checked]:border-indigo-500 peer-data-[state=checked]:text-indigo-600 peer-data-[state=checked]:bg-indigo-50 transition-all capitalize"
+                  >
+                    {theme}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-gray-600 mb-3 block">Language</Label>
+            <Select defaultValue={currentLanguage} onValueChange={setCurrentLanguage}>
+              <SelectTrigger className="w-full sm:w-[200px] rounded-xl border-gray-200 h-10">
+                <SelectValue placeholder="Select language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="es">Español</SelectItem>
+                <SelectItem value="fr">Français</SelectItem>
+                <SelectItem value="de">Deutsch</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="bg-white rounded-2xl border border-red-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-red-50 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center">
+            <ShieldCheck className="h-4 w-4 text-red-500" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-red-700">Danger Zone</h3>
+            <p className="text-[11px] text-gray-400">Irreversible actions</p>
+          </div>
+        </div>
+        <div className="p-6">
+          <p className="text-xs text-gray-500 mb-3">Once you delete your account, there is no going back.</p>
+          <Button variant="destructive" disabled className="rounded-xl text-xs font-bold">
+            Delete Account (Coming Soon)
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

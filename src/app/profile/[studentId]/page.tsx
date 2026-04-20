@@ -13,8 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useToast } from '@/hooks/use-toast';
 import { CHAT_ID_SEPARATOR } from '@/lib/constants';
-
-const MOCK_USER_DB_KEY = 'internaMockUserDB';
+import { createBrowserClient } from '@supabase/ssr';
 
 const constructStudentProfile = (userData: any, userId: string): StudentProfile => {
   return {
@@ -119,40 +118,43 @@ export default function StudentProfilePage() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const CUE = localStorage.getItem('userEmail');
-    if (CUE) {
-        setLoggedInUserEmail(CUE.toLowerCase());
-    }
-
-    if (studentIdFromUrl) {
-      setIsLoading(true);
-      let decodedStudentId = "";
+    const fetchProfile = async () => {
       try {
-        decodedStudentId = decodeURIComponent(studentIdFromUrl);
-      } catch (e) {
-        console.error("Failed to decode studentIdFromUrl:", studentIdFromUrl, e);
-        setProfile(null);
-        setIsLoading(false);
-        return;
-      }
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setLoggedInUserEmail(user.email?.toLowerCase() || null);
+        }
 
-      const lowerCaseStudentId = decodedStudentId.toLowerCase();
-      const storedUsersRaw = localStorage.getItem(MOCK_USER_DB_KEY);
-      const storedUsers = storedUsersRaw ? JSON.parse(storedUsersRaw) : {};
-      const userData = storedUsers[lowerCaseStudentId];
+        if (!studentIdFromUrl) {
+          setProfile(null);
+          setIsLoading(false);
+          return;
+        }
 
-      if (userData && userData.role === 'student') {
-        const fetchedProfile = constructStudentProfile(userData, lowerCaseStudentId);
-        setProfile(fetchedProfile);
-      } else {
-        console.warn(`No student data found for ID (email): ${lowerCaseStudentId} or role is not student. Original param: ${studentIdFromUrl}`);
+        const decodedId = decodeURIComponent(studentIdFromUrl);
+
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', decodedId).single();
+
+        if (error || !data) {
+          console.warn('Profile not found', error);
+          setProfile(null);
+        } else {
+          // It's possible the `decodedId` used from talent/page mapping was the user's UUID. 
+          // So the 'id' here resolves directly!
+          setProfile(constructStudentProfile(data, data.id));
+        }
+      } catch (err) {
+        console.error("Error fetching profile", err);
         setProfile(null);
-      }
-      setIsLoading(false);
-    } else {
+      } finally {
         setIsLoading(false);
-        setProfile(null); // No ID in URL
-    }
+      }
+    };
+    fetchProfile();
   }, [studentIdFromUrl]);
 
   const handleWhatsAppContact = () => {
@@ -162,41 +164,57 @@ export default function StudentProfilePage() {
     }
   };
 
-  const handleMessageStudent = () => {
-    const currentLoggedInUserEmail = localStorage.getItem('userEmail'); // Re-fetch to ensure freshness
-    const studentEmailToMessage = profile?.userId;
+  const handleMessageStudent = async () => {
+    if (!loggedInUserEmail) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to message this student.",
+        variant: "destructive",
+      });
+      router.push('/login?redirect=' + encodeURIComponent(pathname || `/profile/${profile?.userId || ''}`));
+      return;
+    }
 
-    if (!currentLoggedInUserEmail || currentLoggedInUserEmail.trim() === '' || !currentLoggedInUserEmail.includes('@')) {
-      toast({
-        title: "Login Required / Invalid User Email",
-        description: "Please ensure you are logged in with a valid email to message this student.",
-        variant: "destructive",
-      });
-      if (!currentLoggedInUserEmail) router.push('/login?redirect=' + encodeURIComponent(pathname || `/profile/${profile?.userId || ''}`));
-      return;
-    }
-    if (!studentEmailToMessage || studentEmailToMessage.trim() === '' || !studentEmailToMessage.includes('@')) {
-      console.error("Student profile or userId is missing/invalid for chat:", studentEmailToMessage);
-      toast({
-        title: "Error Initiating Chat",
-        description: "Could not initiate chat. Student identifier is invalid or missing.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (currentLoggedInUserEmail.toLowerCase() === studentEmailToMessage.toLowerCase()) {
-        toast({
-            title: "Action Not Available",
-            description: "You cannot message yourself.",
-            variant: "default",
-        });
+    const studentId = profile?.userId;
+    if (!studentId) return;
+
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      if (user.id === studentId) {
+        toast({ title: "Action Not Available", description: "You cannot message yourself.", variant: "default" });
         return;
+      }
+
+      let { data: convo } = await supabase.from('conversations')
+        .select('id')
+        .or(`and(participant1_id.eq.${user.id},participant2_id.eq.${studentId}),and(participant1_id.eq.${studentId},participant2_id.eq.${user.id})`)
+        .maybeSingle();
+
+      if (!convo) {
+        const { data: newConvo } = await supabase.from('conversations').insert({
+          participant1_id: user.id,
+          participant2_id: studentId
+        }).select().single();
+        convo = newConvo;
+      }
+      
+      if (convo) {
+        router.push(`/messages/${convo.id}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error", description: "Could not start conversation.", variant: "destructive" });
     }
-    const chatId = generateChatId(currentLoggedInUserEmail, studentEmailToMessage);
-    router.push(`/messages/${chatId}`);
   };
   
-  const isOwnProfile = loggedInUserEmail && profile && loggedInUserEmail === profile.userId.toLowerCase();
+  const isOwnProfile = profile && loggedInUserEmail && profile.email === loggedInUserEmail;
 
 
   if (isLoading || profile === undefined) {

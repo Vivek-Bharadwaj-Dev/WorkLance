@@ -95,7 +95,8 @@ export default function LoginPage() {
         variant: "default",
       });
       
-      router.push("/"); 
+      const role = data.user.user_metadata?.role || "student";
+      router.push(`/dashboard/${role}`); 
       router.refresh();
     }
     

@@ -21,18 +21,15 @@ export const mainNavLinks: NavLinkType[] = [
   { href: '/contact', label: 'Contact', showWhenLoggedOutOnly: true },
 
   // Freelancer (Student) Links
-  { href: '/', label: 'Home', authRequired: true, role: 'student' },
+  { href: '/dashboard/student', label: 'Dashboard', authRequired: true, role: 'student' },
   { href: '/jobs', label: 'Jobs', authRequired: true, role: 'student' },
   { href: '/messages', label: 'Messages', authRequired: true, role: 'student' },
   { href: '/contact', label: 'Contact', authRequired: true, role: 'student' },
-  { href: '/dashboard/student', label: 'Dashboard', authRequired: true, role: 'student' },
 
   // Client Links
-  { href: '/', label: 'Home', authRequired: true, role: 'client' },
-  { href: '/about', label: 'About', authRequired: true, role: 'client' },
-  { href: '/messages', label: 'Messages', authRequired: true, role: 'client' },
-  { href: '/talent', label: 'Talent', authRequired: true, role: 'client' },
   { href: '/dashboard/client', label: 'Dashboard', authRequired: true, role: 'client' },
+  { href: '/talent', label: 'Talent', authRequired: true, role: 'client' },
+  { href: '/messages', label: 'Messages', authRequired: true, role: 'client' },
   { href: '/jobs/post', label: 'Post a Gig', authRequired: true, role: 'client' },
   { href: '/contact', label: 'Contact', authRequired: true, role: 'client' },
 ];
