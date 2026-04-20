@@ -29,7 +29,7 @@ import { CalendarIcon, DollarSign, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge"; 
 import { useRouter } from "next/navigation";
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 import { Loader2 } from "lucide-react";
 
 const jobSchema = z.object({
@@ -63,10 +63,7 @@ export default function PostJobPage() {
     },
   });
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
 
   const handleAddSkill = (field: any) => {
     const skillToAdd = currentSkill.trim().toLowerCase();

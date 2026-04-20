@@ -3,6 +3,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+export const dynamic = 'force-dynamic';
 import * as z from "zod";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/shared/Logo";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 import { useState } from "react";
 import {
   Dialog,
@@ -48,10 +49,7 @@ export default function LoginPage() {
   const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),

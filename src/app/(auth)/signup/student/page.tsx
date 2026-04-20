@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+export const dynamic = 'force-dynamic';
 import * as z from "zod";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { Logo } from "@/components/shared/Logo";
 import { ArrowRight, GraduationCap, X, Phone, Loader2, MailCheck, Code, Paintbrush, BriefcaseIcon } from "lucide-react";
 import React, { useState } from "react";
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 
@@ -50,10 +51,7 @@ export default function StudentSignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
 
   const form = useForm<z.infer<typeof studentSignupSchema>>({
     resolver: zodResolver(studentSignupSchema),
