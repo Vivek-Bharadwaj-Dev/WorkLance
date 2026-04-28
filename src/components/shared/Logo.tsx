@@ -14,7 +14,7 @@ export function Logo({ className, iconSize = 140, textSize = "text-2xl", showTex
     <Link href="/" className={`flex items-center space-x-2 font-bold text-primary hover:opacity-80 transition-opacity ${className}`}>
       <div className="relative flex-shrink-0" style={{ width: iconSize, height: iconSize }}>
         <Image
-          src="/Images/logo.png"
+          src="/images/logo.png"
           alt="Worklance Logo"
           fill
           className="object-contain"

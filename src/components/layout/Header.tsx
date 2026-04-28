@@ -186,7 +186,7 @@ export default function Header() {
   const UserMenu = () => {
     if (!isLoggedIn) return null;
 
-    let profileLink = userRole === 'student' ? '/profile/edit' : '/dashboard/client/settings'; // Client profile edit not yet distinct
+    let profileLink = '/profile/settings'; // Unified global profile settings page
     let dashboardLink = userRole === 'student' ? '/dashboard/student' : (userRole === 'client' ? '/dashboard/client' : '/');
     const userEmail = localStorage.getItem('userEmail');
 
@@ -276,7 +276,7 @@ export default function Header() {
                         asChild
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <Link href={userRole === 'student' ? '/profile/edit' : '/dashboard/client/settings'} >
+                        <Link href='/profile/settings'>
                           {getNavLinkIcon('Profile Settings')} Profile Settings
                         </Link>
                       </Button>

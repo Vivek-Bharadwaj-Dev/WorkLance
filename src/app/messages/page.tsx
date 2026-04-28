@@ -130,7 +130,8 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="py-8 min-h-[calc(100vh-5rem)] bg-gradient-to-br from-indigo-50/40 via-white to-violet-50/40">
+      <div className="container mx-auto px-4">
       <Card className="max-w-2xl mx-auto shadow-lg rounded-xl">
         <CardHeader>
           <CardTitle className="text-2xl flex items-center"><Inbox className="mr-3 h-6 w-6 text-primary" /> Your Conversations</CardTitle>
@@ -176,6 +177,7 @@ export default function MessagesPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

@@ -170,7 +170,8 @@ export default function JobsPage() {
   const allItemsLoaded = displayedJobsCount >= filteredAndSortedJobs.length;
 
   return (
-    <div className="space-y-10 md:space-y-12 py-8 container-xl"> {/* Added container-xl */}
+    <div className="py-8 min-h-[calc(100vh-5rem)] bg-gradient-to-br from-indigo-50/40 via-white to-violet-50/40">
+      <div className="space-y-10 md:space-y-12 container-xl mx-auto px-4">
       <section className="bg-card p-6 md:p-8 rounded-xl shadow-lg border border-border/50">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
@@ -270,6 +271,7 @@ export default function JobsPage() {
             <Button variant="outline" size="lg" className="rounded-lg px-8" onClick={handleLoadMore}>Load More Listings</Button>
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -58,6 +58,20 @@ export default function TalentPage() {
       }
     };
     fetchTalent();
+
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    const channel = supabase.channel('realtime_profiles')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'profiles' }, (payload) => {
+          if (payload.new && payload.new.role === 'student') {
+            fetchTalent();
+          }
+      }).subscribe();
+      
+    return () => { supabase.removeChannel(channel); }
   }, []);
 
 
@@ -107,7 +121,8 @@ export default function TalentPage() {
   const allTalentLoaded = displayedTalentCount >= filteredTalent.length;
 
   return (
-    <div className="space-y-10 md:space-y-12 py-8 container-xl">
+    <div className="py-8 min-h-[calc(100vh-5rem)] bg-gradient-to-br from-indigo-50/40 via-white to-violet-50/40">
+      <div className="space-y-10 md:space-y-12 container-xl mx-auto px-4">
       <section className="text-center">
         <UserSearch className="h-16 w-16 mx-auto text-primary mb-4" />
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
@@ -209,6 +224,7 @@ export default function TalentPage() {
             <Button variant="outline" size="lg" className="rounded-lg px-8" onClick={handleLoadMore}>Load More Talent</Button>
         </div>
       )}
+      </div>
     </div>
   );
 }

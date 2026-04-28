@@ -35,7 +35,23 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // protected routes logic here if needed
+  const url = request.nextUrl.clone()
+  const isDashboardRoute = url.pathname.startsWith('/dashboard') || url.pathname.startsWith('/profile')
+  const isAuthRoute = url.pathname.startsWith('/login') || url.pathname.startsWith('/signup') || url.pathname.startsWith('/register')
+  const isHomeRoute = url.pathname === '/'
+
+  if (user) {
+    if (isHomeRoute || isAuthRoute) {
+      const role = user.user_metadata?.role || 'student'
+      url.pathname = `/dashboard/${role}`
+      return NextResponse.redirect(url)
+    }
+  } else {
+    if (isDashboardRoute) {
+      url.pathname = '/'
+      return NextResponse.redirect(url)
+    }
+  }
 
   return supabaseResponse
 }

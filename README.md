@@ -1,224 +1,81 @@
-# WorkLance
+# WorkLance Platform
 
-*Connecting businesses with elite freelance talent — fast, secure, and beautifully.*
+![WorkLance Logo](public/images/logo.png)
 
-[](https://www.google.com/search?q=https://nextjs.org/)
-[](https://www.google.com/search?q=https://www.typescriptlang.org/)
-[](https://www.google.com/search?q=https://tailwindcss.com/)
-[](https://www.google.com/search?q=https://supabase.com/)
-[](https://www.google.com/search?q=https://www.framer.com/motion/)
+WorkLance is a premium, cutting-edge freelance and internship platform tailored explicitly for university students and forward-thinking businesses. Leveraging dynamic AI job matching, a deeply customized user experience, and real-time communication modules, WorkLance connects fresh talent directly with real-world opportunities.
 
-[View Repository](https://github.com/Vivek21Bharadwaj/WorkLance) • [Report Bug](https://www.google.com/search?q=https://github.com/Vivek21Bharadwaj/WorkLance/issues) • [Request Feature](https://www.google.com/search?q=https://github.com/Vivek21Bharadwaj/WorkLance/issues)
+🌐 **Live Demo:** [worklance-project.vercel.app](https://worklance-project.vercel.app)
 
+---
 
------
+## 🌟 Key Features
 
-## 📋 Table of Contents
+1. **Role-Based Workspaces**: Instant, intelligent routing directs authenticated Freelancers (Students) and Clients to dedicated dashboards with tailored capabilities.
+2. **AI-Powered Matching Engine**: Integrates modern generative AI (Google Genkit + Gemini) to intelligently analyze unformatted skill arrays and parse employer requirements, synthesizing perfect job recommendations.
+3. **Synchronous Realtime Environment**: Built on Supabase’s Realtime WebSocket technologies, ensuring the `/talent` directory and `messaging` features are 100% synchronized across all clients without a page refresh.
+4. **Standalone Settings Hub**: A centralized, globally accessible profile portal for managing standard preferences, ensuring seamless adjustments separate from contextual dashboard work.
+5. **Harmonized Premium Aesthetics**: Leverages an energetic and sophisticated brand palette wrapped inside interactive gradients (`bg-gradient-to-br from-indigo-50/40 via-white to-violet-50/40`) to stand out from generic MVPs.
 
-  - [About the Project](https://www.google.com/search?q=%23-about-the-project)
-  - [Screenshots](https://www.google.com/search?q=%23-screenshots)
-  - [Key Features](https://www.google.com/search?q=%23-key-features)
-  - [Tech Stack](https://www.google.com/search?q=%23-tech-stack)
-  - [AI Integration](https://www.google.com/search?q=%23-ai-integration)
-  - [Architecture & Structure](https://www.google.com/search?q=%23-architecture--structure)
-  - [Data Models](https://www.google.com/search?q=%23-data-models)
-  - [Routing & Pages](https://www.google.com/search?q=%23-routing--pages)
-  - [Getting Started](https://www.google.com/search?q=%23-getting-started)
-  - [Use Cases](https://www.google.com/search?q=%23-use-cases)
+---
 
------
+## 🚀 Technology Stack
 
-## 📖 About the Project
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Directory)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [Vanilla CSS Modules]
+- **Backend / Database**: [Supabase](https://supabase.com/) (PostgreSQL + Realtime + Storage + Auth)
+- **AI Tooling**: [Google Genkit](https://firebase.google.com/docs/genkit) + Gemini API
+- **UI Components**: custom `shadcn/ui` variants & Radix Primitives
 
-WorkLance is a **premium freelance and internship marketplace** designed to bridge the gap between businesses and independent professionals (specifically students). It provides a beautifully crafted modern interface where clients can post job listings (gigs) and freelancers can discover, apply for, and manage projects.
+---
 
-The platform is heavily focused on UX and performance, featuring **AI-powered job matching** via Google's Genkit AI, **real-time messaging**, **role-based dashboards**, and **secure authentication** using Supabase and Firebase OAuth. Built to handle modern marketplace demands, it incorporates micro-animations, glassmorphism, and a fully responsive design.
-
-*Note: The platform is currently in an MVP stage. Authentication is handled production-ready via Supabase, while marketplace data persists via client-side `localStorage`.*
-
------
-
-## 📸 Screenshots
-
-*(Replace placeholders with actual image paths)*
-
-| Homepage | Job Listings |
-|:---:|:---:|
-| \<img src="public/images/Screenshot of WorkLance.png" alt="Homepage" width="400"/\> | \<img src="public/images/Job Matching WorkLance..png" alt="Job Listings" width="400"/\> |
-
------
-
-## ✨ Key Features
-
-### 👨‍💻 For Freelancers (Students)
-
-  * **Smart Discovery:** Browse, search, and filter job listings (category, type, keyword).
-  * **AI Matchmaking:** Google Genkit AI analyzes skills to recommend the highest-probability job matches.
-  * **Application System:** Submit project proposals directly through the platform.
-  * **Custom Dashboard:** Track earnings, active projects, proposal counts, profile views, and recent activity.
-  * **Professional Profiles:** Showcase portfolio items, education, experience, skills, and set an hourly rate.
-  * **Communication:** Real-time client messaging and WhatsApp integration.
-
-### 🏢 For Clients (Businesses)
-
-  * **Gig Management:** Post detailed job listings (budget, skills, deadlines, location, categories).
-  * **Talent Discovery:** Browse the marketplace talent pool and discover top freelancers.
-  * **Applicant Tracking:** Review applications, manage candidates, and track hiring pipelines.
-  * **Client Dashboard:** Monitor total spending, active projects, hired talent, and company profile completeness.
-
-### 🌐 Platform-Wide Features
-
-  * **Secure Authentication:** Email/password verification + Google & Facebook OAuth via Supabase Auth.
-  * **Role-Based Access Control:** Distinct navigation flows and protected routes for Freelancers vs. Clients.
-  * **Premium UI/UX:** Framer Motion micro-animations, glassmorphism, gradient backgrounds, and draggable carousels.
-
------
-
-## 🛠 Tech Stack
-
-| Layer | Technology |
-|---|---|
-| **Framework** | Next.js 14 (App Router), React 18, TypeScript |
-| **Styling** | Tailwind CSS 3.4, `tailwindcss-animate` |
-| **UI System** | Radix UI Primitives (33+ components), `class-variance-authority`, `clsx`, `tailwind-merge` |
-| **Animations** | Framer Motion 12 |
-| **Forms & Validation** | React Hook Form, Zod |
-| **Authentication** | Supabase Auth (`@supabase/ssr`), Firebase SDK (OAuth Providers) |
-| **AI / ML** | Google Genkit AI (`@genkit-ai/googleai`) |
-| **Utilities** | Recharts, `date-fns`, `react-day-picker`, Lucide React |
-
------
-
-## 🧠 AI Integration: Job Matcher Flow
-
-WorkLance utilizes **Google Genkit AI** to solve the marketplace "cold start" problem by intelligently connecting talent to opportunities.
-
-  * **Engine:** Server-side execution using `@genkit-ai/googleai`.
-  * **Processing:** Takes the freelancer's specific skill set and the current active job pool (titles, descriptions, required skills).
-  * **Output:** Returns a strictly structured, Zod-validated ranking of recommended jobs, appended with concise (max 15 words) match reasoning.
-
------
-
-## 🏗 Architecture & Structure
-
-The codebase follows a modular Next.js App Router pattern, isolating the UI, Authentication, AI, and Data layers.
-
-```text
-src/
-├── ai/                # Genkit config, dev server, and job-matcher-flow
-├── app/               # App Router pages, global CSS, and nested layouts
-│   ├── (auth)/        # Login, Signup (Role-based), Password Reset
-│   ├── dashboard/     # Role-protected client/student dashboards
-│   ├── jobs/          # Job board, individual listings, job posting
-│   ├── profile/       # Public and editable freelancer profiles
-│   └── messages/      # Chat threads and conversation lists
-├── components/        # Radix UI primitives, Layout components, Shared UI
-├── hooks/             # Custom React hooks (use-mobile, use-toast)
-├── lib/               # Utility functions, Firebase init, Supabase clients/middleware
-└── types/             # Strict TypeScript interfaces
-```
-
------
-
-## 🗄 Data Models
-
-Core entities strictly typed via TypeScript (`src/types/index.ts`):
-
-```typescript
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'student' | 'client' | 'admin';
-  avatarUrl?: string;
-  whatsappNumber?: string;
-}
-
-interface Job {
-  id: string;
-  title: string;
-  description: string;
-  category: { id: string; name: string };
-  type: 'online' | 'offline' | 'hybrid';
-  budget?: number;
-  postedBy: { id: string; name: string; avatarUrl?: string; whatsappNumber?: string };
-  createdAt: string;
-  status?: 'open' | 'in-progress' | 'completed' | 'closed';
-  // ...
-}
-
-interface Application {
-  id: string;
-  jobId: string;
-  student: { id: string; name: string; avatarUrl?: string };
-  proposal: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'withdrawn';
-  submittedAt: string;
-}
-```
-
------
-
-## 🗺 Routing & Pages
-
-| Route | Access Level | Description |
-|---|---|---|
-| `/`, `/about`, `/contact` | Public | Core static pages and landing sections |
-| `/jobs`, `/talent` | Public | Browse job listings and freelancer profiles |
-| `/login`, `/signup/*` | Guest | Authentication flows and role selection |
-| `/dashboard/student/*` | Freelancers | AI matches, proposals, active jobs, payments |
-| `/dashboard/client/*` | Clients | Job management, application tracking, settings |
-| `/messages/*` | Authenticated | Real-time conversation threads |
-
------
-
-## 🚀 Getting Started
+## 💻 Getting Started Locally
 
 ### Prerequisites
-
-  * Node.js (v18.17+ recommended)
-  * Git
-  * Supabase Account (for Authentication)
+- Node.js (v18.x or newer)
+- npm, yarn, or pnpm
+- Your own Supabase instance and Google Gemini API keys
 
 ### Installation
 
-1.  **Clone the repository:**
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-org/worklance-repo.git
+   cd WorkLance
+   ```
 
-    ```bash
-    git clone https://github.com/Vivek21Bharadwaj/WorkLance.git
-    cd WorkLance
-    ```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-2.  **Install dependencies:**
+3. **Database Configuration**
+   Execute the `supabase_setup.sql` script located in the root of the project to instantiate your required Supabase primitives:
+   - `messages` and `conversations` tables
+   - `avatars` Storage bucket with appropriate permissive access profiles.
 
-    ```bash
-    npm install
-    ```
+4. **Environment Variables**
+   Create a `.env.local` file with the following standard configurations:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   GEMINI_API_KEY=your-gemini-key
+   ```
 
-3.  **Set up Environment Variables:**
-    Create a `.env.local` file in the root directory and add your Supabase credentials. **Never commit this file.**
+5. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
 
-    ```env
-    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ```
+---
 
-    *(Note: Firebase configuration for OAuth is managed in `src/lib/firebase.ts`)*
+## 📸 Screenshots
 
-4.  **Run the development server:**
+| Dashboard Interface | Job Matches Interface | Realtime Messaging |
+|:---:|:---:|:---:|
+| *(Explore your custom dashboard directly tailored to your role post-login)* | *(Access precise AI matches linking directly to complex role definitions)* | *(Chat instantaneously without frustrating reloads)* |
 
-    ```bash
-    npm run dev
-    ```
+--- 
 
-    Open `http://localhost:3000` to view the application.
+## 🛡 License
 
-### Build Scripts
-
-  * `npm run dev` - Start development server
-  * `npm run build` - Build for production
-  * `npm run start` - Start production server
-  * `npm run lint` - Execute ESLint checks
-
-
-**Developed by Vivek Bharadwaj**
+WorkLance is proprietary & confidential platform material. Built using cutting-edge Agentic Coding frameworks.

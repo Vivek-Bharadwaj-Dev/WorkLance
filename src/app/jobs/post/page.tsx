@@ -111,11 +111,11 @@ export default function PostJobPage() {
       form.reset(); 
       setCurrentSkill(""); 
       router.push('/dashboard/client'); 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to save job to Supabase:", error);
       toast({
-        title: "Error",
-        description: "Could not save job posting. Please try again.",
+        title: "Error Posting Job",
+        description: `Failed: ${error?.message || 'Could not save job posting (Possible RLS issue). Please check database.'}`,
         variant: "destructive",
       });
     } finally {
@@ -174,37 +174,9 @@ export default function PostJobPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a job category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="design">Graphic Design</SelectItem>
-                        <SelectItem value="webdev">Web Development</SelectItem>
-                        <SelectItem value="marketing">Digital Marketing</SelectItem>
-                        <SelectItem value="writing">Writing & Translation</SelectItem>
-                        <SelectItem value="ai_ml">AI & Machine Learning</SelectItem>
-                        <SelectItem value="data_science">Data Science</SelectItem>
-                        <SelectItem value="tutor">Tutoring & Academics</SelectItem>
-                        <SelectItem value="video">Video & Animation</SelectItem>
-                        <SelectItem value="event">Event Support</SelectItem>
-                        <SelectItem value="cybersecurity">Cybersecurity</SelectItem>
-                        <SelectItem value="gamedev">Game Development</SelectItem>
-                        <SelectItem value="cloud">Cloud Computing</SelectItem>
-                        <SelectItem value="robotics">Robotics</SelectItem>
-                        <SelectItem value="finance">Finance & Fintech</SelectItem>
-                        <SelectItem value="customer_service">Customer Service</SelectItem>
-                        <SelectItem value="sales_support">Sales Support</SelectItem>
-                        <SelectItem value="admin_support">Administrative Support</SelectItem>
-                        <SelectItem value="research_assistant">Research Assistant</SelectItem>
-                        <SelectItem value="general_help">General Help / Errands</SelectItem>
-                        <SelectItem value="hospitality">Hospitality & Events</SelectItem>
-                        <SelectItem value="manual_labor">Manual Labor & Trades</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input placeholder="e.g., Graphic Design, Web Development..." {...field} value={field.value ?? ""} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

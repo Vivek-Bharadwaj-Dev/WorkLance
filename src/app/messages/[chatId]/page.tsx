@@ -77,9 +77,30 @@ export default function ChatPage() {
           isRead: true
         })));
       }
-      setIsLoading(false);
+      const channel = supabase.channel(`realtime_chat_${chatId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${chatId}` }, (payload) => {
+          if (payload.new) {
+            setMessages(prev => {
+              // avoid duplicate if sent by ourselves just now
+              if (prev.find(m => m.id === payload.new.id)) return prev;
+              
+              return [...prev, {
+                id: payload.new.id,
+                chatId,
+                senderId: payload.new.sender_id,
+                receiverId: otherProfile?.id,
+                content: payload.new.content,
+                timestamp: payload.new.created_at,
+                isRead: payload.new.is_read
+              }];
+            });
+          }
+        }).subscribe();
+
+      return () => { supabase.removeChannel(channel); };
     };
-    fetchChat();
+    const cleanup = fetchChat();
+    return () => { cleanup.then(fn => fn && fn()); };
   }, [chatId, router]);
 
   useEffect(() => {
