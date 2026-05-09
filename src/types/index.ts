@@ -3,7 +3,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'student' | 'client' | 'admin';
+  role: 'freelancer' | 'client' | 'admin';
   avatarUrl?: string;
   whatsappNumber?: string; // Added
 }
@@ -33,7 +33,7 @@ export interface Job {
   status?: 'open' | 'in-progress' | 'completed' | 'closed';
 }
 
-export interface StudentProfile {
+export interface FreelancerProfile {
   userId: string; // Typically email
   name: string;
   avatarUrl?: string;
@@ -88,7 +88,7 @@ export interface Application {
   id: string;
   jobId: string;
   jobTitle?: string;
-  student: Pick<User, 'id' | 'name' | 'avatarUrl'>; // student.id should be their email
+  freelancer: Pick<User, 'id' | 'name' | 'avatarUrl'>; // freelancer.id should be their email
   proposal: string;
   status: 'pending' | 'accepted' | 'rejected' | 'withdrawn';
   submittedAt: string;
@@ -103,7 +103,7 @@ export interface Rating {
   rating: 1 | 2 | 3 | 4 | 5;
   comment?: string;
   createdAt: string;
-  type: 'student_to_client' | 'client_to_student';
+  type: 'freelancer_to_client' | 'client_to_freelancer';
 }
 
 export interface Message {

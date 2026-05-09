@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard,
   Briefcase,
@@ -30,24 +31,66 @@ export default function DashboardLayout({
   const [role, setRole] = useState<Role>(null);
   const [userName, setUserName] = useState("User");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    if (!isLoggedIn) {
-      router.push("/login");
-      return;
-    }
-    const storedRole = localStorage.getItem("userRole") as Role;
-    setRole(storedRole);
-    const storedName = localStorage.getItem("userName");
-    if (storedName) setUserName(storedName);
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          // Clear any stale localStorage
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userEmail');
+          router.push("/login");
+          return;
+        }
+
+        const userRole = (user.user_metadata?.role || 'student') as Role;
+        const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'User';
+
+        // Sync localStorage for Header component
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', userRole);
+        localStorage.setItem('userName', name);
+        localStorage.setItem('userEmail', user.email || '');
+
+        setRole(userRole);
+        setUserName(name);
+      } catch (e) {
+        console.error("Auth check failed", e);
+        router.push("/login");
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   useEffect(() => {
     setMobileSidebarOpen(false);
   }, [pathname]);
 
-  if (!role) {
+  const handleLogout = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error("Error signing out of Supabase", e);
+    }
+
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userEmail');
+    router.push("/login");
+  };
+
+  if (isCheckingAuth || !role) {
     return (
       <div className="flex h-screen items-center justify-center bg-white">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
@@ -67,11 +110,6 @@ export default function DashboardLayout({
     { href: "/dashboard/client/applications", label: "Applications", icon: FileText },
     { href: "/talent", label: "Find Talent", icon: Users },
   ];
-
-  const handleLogout = () => {
-    localStorage.clear();
-    router.push("/login");
-  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white border-r border-gray-100">

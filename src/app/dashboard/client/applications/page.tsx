@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { MessageSquare, Eye, CheckCircle, XCircle, User, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -12,10 +12,7 @@ export default function ClientApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
 
   useEffect(() => {
     fetchApplications();
@@ -33,7 +30,7 @@ export default function ClientApplicationsPage() {
       if (employerJobs && employerJobs.length > 0) {
         const jobIds = employerJobs.map(j => j.id);
         const { data: appData } = await supabase
-          .from('job_applications')
+          .from('applications')
           .select('*, profiles:student_id(full_name, avatar_url)')
           .in('job_id', jobIds)
           .order('created_at', { ascending: false });
@@ -59,7 +56,7 @@ export default function ClientApplicationsPage() {
 
   const handleUpdateStatus = async (appId: string, status: string) => {
     try {
-      const { error } = await supabase.from('job_applications').update({ status }).eq('id', appId);
+      const { error } = await supabase.from('applications').update({ status }).eq('id', appId);
       if (error) throw error;
       toast({ title: `Application ${status}`, description: `The application status has been updated.` });
       fetchApplications();

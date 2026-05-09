@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-export const dynamic = 'force-dynamic';
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -78,8 +77,6 @@ export default function UpdatePasswordPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4">
       <div className="mb-10 text-center">
-        <Logo iconSize={64} showText={false} className="justify-center mb-4" />
-        <Logo className="justify-center" iconSize={48} textSize="text-3xl" />
         <p className="mt-3 text-muted-foreground">Set your new password below.</p>
       </div>
       <Card className="w-full max-w-md shadow-xl rounded-xl border-border/60 bg-card">

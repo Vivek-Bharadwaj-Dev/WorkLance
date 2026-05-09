@@ -9,7 +9,7 @@ interface LogoProps {
   showText?: boolean;
 }
 
-export function Logo({ className, iconSize = 140, textSize = "text-2xl", showText = true }: LogoProps) {
+export function Logo({ className, iconSize = 36, textSize = "text-2xl", showText = true }: LogoProps) {
   return (
     <Link href="/" className={`flex items-center space-x-2 font-bold text-primary hover:opacity-80 transition-opacity ${className}`}>
       <div className="relative flex-shrink-0" style={{ width: iconSize, height: iconSize }}>
@@ -17,6 +17,7 @@ export function Logo({ className, iconSize = 140, textSize = "text-2xl", showTex
           src="/images/logo.png"
           alt="Worklance Logo"
           fill
+          sizes={`${iconSize}px`}
           className="object-contain"
           priority
         />

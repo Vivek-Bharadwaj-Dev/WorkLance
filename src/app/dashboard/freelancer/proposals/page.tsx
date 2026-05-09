@@ -3,16 +3,13 @@
 import { useState, useEffect } from "react";
 import { FileText, Eye, Edit3, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 
 export default function StudentProposalsPage() {
   const [apps, setApps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
 
   useEffect(() => {
     fetchProposals();
@@ -24,7 +21,7 @@ export default function StudentProposalsPage() {
       if (!user) return;
 
       const { data: appData } = await supabase
-        .from('job_applications')
+        .from('applications')
         .select(`
            *,
            jobs:job_id(title)

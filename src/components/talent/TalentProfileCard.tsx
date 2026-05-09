@@ -1,57 +1,80 @@
 
 "use client";
 
-import type { StudentProfile } from "@/types";
+import type { FreelancerProfile } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Briefcase, DollarSign, GraduationCap, MapPin, MessageSquare, Star, ExternalLink } from "lucide-react";
+import { Briefcase, DollarSign, GraduationCap, MapPin, MessageSquare, Star, ExternalLink, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation"; 
 import { useToast } from "@/hooks/use-toast";
-import { CHAT_ID_SEPARATOR } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
 
 interface TalentProfileCardProps {
-  student: StudentProfile;
+  freelancer: FreelancerProfile;
 }
 
-// Helper function to generate chat ID
-const generateChatId = (email1: string, email2: string): string => {
-  const sortedEmails = [email1.toLowerCase(), email2.toLowerCase()].sort();
-  return sortedEmails.join(CHAT_ID_SEPARATOR);
-};
-
-export default function TalentProfileCard({ student }: TalentProfileCardProps) {
+export default function TalentProfileCard({ freelancer }: TalentProfileCardProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const [isStartingChat, setIsStartingChat] = useState(false);
 
-  const handleMessageClick = () => {
-    const currentUserEmail = localStorage.getItem('userEmail');
-    const studentEmail = student.userId; // student.userId is the email
+  const handleMessageClick = async () => {
+    setIsStartingChat(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
 
-    if (!currentUserEmail || currentUserEmail.trim() === '' || !currentUserEmail.includes('@')) {
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to message talent.",
+          variant: "destructive",
+        });
+        router.push('/login?redirect=/talent');
+        return;
+      }
+
+      const freelancerId = freelancer.userId;
+
+      if (user.id === freelancerId) {
+        toast({ title: "Action Not Available", description: "You cannot message yourself.", variant: "default" });
+        return;
+      }
+
+      // Check for existing conversation
+      let { data: convo } = await supabase.from('conversations')
+        .select('id')
+        .or(`and(participant1_id.eq.${user.id},participant2_id.eq.${freelancerId}),and(participant1_id.eq.${freelancerId},participant2_id.eq.${user.id})`)
+        .maybeSingle();
+
+      // Create new conversation if none exists
+      if (!convo) {
+        const { data: newConvo, error } = await supabase.from('conversations').insert({
+          participant1_id: user.id,
+          participant2_id: freelancerId,
+        }).select().single();
+
+        if (error) throw error;
+        convo = newConvo;
+      }
+
+      if (convo) {
+        router.push(`/messages/${convo.id}`);
+      }
+    } catch (err) {
+      console.error("Error starting conversation:", err);
       toast({
-        title: "Login Required / Invalid User Email",
-        description: "Please ensure you are logged in with a valid email to message talent.",
+        title: "Error",
+        description: "Could not start conversation. Please try again.",
         variant: "destructive",
       });
-      if (!currentUserEmail) router.push('/login?redirect=/talent');
-      return;
+    } finally {
+      setIsStartingChat(false);
     }
-
-    if (!studentEmail || studentEmail.trim() === '' || !studentEmail.includes('@')) {
-      console.error("Student email (userId) is missing or invalid for chat:", studentEmail);
-      toast({
-        title: "Error Initiating Chat",
-        description: "Could not initiate chat. The student's identifier is invalid or missing. Please try again later or contact support if the issue persists.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const chatId = generateChatId(currentUserEmail, studentEmail);
-    router.push(`/messages/${chatId}`);
   };
 
   return (
@@ -59,53 +82,58 @@ export default function TalentProfileCard({ student }: TalentProfileCardProps) {
       <CardHeader className="p-5">
         <div className="flex items-start space-x-4">
           <Avatar className="h-20 w-20 border-2 border-primary/20">
-            <AvatarImage src={student.avatarUrl || `https://dummyimage.com/80x80.png/eeeeee/333333&text=${student.name.substring(0,1).toUpperCase()}`} alt={student.name} data-ai-hint="person student"/>
-            <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={freelancer.avatarUrl || `https://dummyimage.com/80x80.png/eeeeee/333333&text=${freelancer.name.substring(0,1).toUpperCase()}`} alt={freelancer.name} data-ai-hint="person freelancer"/>
+            <AvatarFallback>{freelancer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex-grow">
-            <CardTitle className="text-xl group-hover:text-primary transition-colors">{student.name}</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">{student.headline || "Eager student seeking opportunities"}</CardDescription>
-            {student.rating && student.completedJobs !== undefined && (
+            <CardTitle className="text-xl group-hover:text-primary transition-colors">{freelancer.name}</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">{freelancer.headline || "Expert freelancer seeking opportunities"}</CardDescription>
+            {freelancer.rating && freelancer.completedJobs !== undefined && (
               <div className="flex items-center mt-1 text-xs text-amber-500">
                 <Star className="h-4 w-4 mr-1 fill-amber-500" />
-                {student.rating.toFixed(1)} ({student.completedJobs} projects)
+                {freelancer.rating.toFixed(1)} ({freelancer.completedJobs} projects)
               </div>
             )}
           </div>
         </div>
       </CardHeader>
       <CardContent className="p-5 flex-grow space-y-3">
-        {student.skills && student.skills.length > 0 && (
+        {freelancer.skills && freelancer.skills.length > 0 && (
           <div>
             <h4 className="text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wider">Top Skills</h4>
             <div className="flex flex-wrap gap-1.5">
-              {student.skills.slice(0, 5).map((skill) => (
+              {freelancer.skills.slice(0, 5).map((skill) => (
                 <Badge key={skill} variant="secondary" className="px-2 py-0.5 text-xs bg-primary/10 text-primary border-primary/20">{skill}</Badge>
               ))}
-              {student.skills.length > 5 && <Badge variant="outline" className="text-xs px-2 py-0.5">+ {student.skills.length - 5} more</Badge>}
+              {freelancer.skills.length > 5 && <Badge variant="outline" className="text-xs px-2 py-0.5">+ {freelancer.skills.length - 5} more</Badge>}
             </div>
           </div>
         )}
-        {student.location && (
+        {freelancer.location && (
           <div className="flex items-center text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 mr-2 text-primary/70" />
-            {student.location}
+            {freelancer.location}
           </div>
         )}
-        {student.hourlyRate && (
+        {freelancer.hourlyRate && (
             <div className="flex items-center text-sm text-muted-foreground">
                 <DollarSign className="h-4 w-4 mr-2 text-primary/70" />
-                ${student.hourlyRate}/hr
+                ${freelancer.hourlyRate}/hr
             </div>
         )}
 
       </CardContent>
       <CardFooter className="p-5 border-t border-border/30 mt-auto grid grid-cols-2 gap-2">
         <Button asChild className="w-full rounded-lg">
-          <Link href={`/profile/${encodeURIComponent(student.userId)}`}>View Profile <ExternalLink className="ml-1.5 h-4 w-4"/></Link>
+          <Link href={`/profile/${encodeURIComponent(freelancer.userId)}`}>View Profile <ExternalLink className="ml-1.5 h-4 w-4"/></Link>
         </Button>
-        <Button variant="outline" className="w-full rounded-lg" onClick={handleMessageClick}>
-           <MessageSquare className="mr-1.5 h-4 w-4"/> Message
+        <Button variant="outline" className="w-full rounded-lg" onClick={handleMessageClick} disabled={isStartingChat}>
+          {isStartingChat ? (
+            <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+          ) : (
+            <MessageSquare className="mr-1.5 h-4 w-4"/>
+          )}
+          {isStartingChat ? "Starting..." : "Message"}
         </Button>
       </CardFooter>
     </Card>

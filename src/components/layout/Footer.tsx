@@ -9,15 +9,12 @@ import { ArrowRight, Facebook, Twitter, Instagram, Linkedin, Mail, MapPin, Phone
 import { usePathname } from 'next/navigation';
 
 const platformLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About Us' },
   { href: '/jobs', label: 'Find Jobs' },
   { href: '/talent', label: 'Browse Talent' },
-  { href: '/contact', label: 'Contact' },
 ];
 
 const forUsersLinks = [
-  { href: '/dashboard/student', label: 'Freelancer Dashboard' },
+  { href: '/dashboard/freelancer', label: 'Freelancer Dashboard' },
   { href: '/dashboard/client', label: 'Client Dashboard' },
   { href: '/jobs/post', label: 'Post a Gig' },
   { href: '/messages', label: 'Messages' },
@@ -43,7 +40,7 @@ export default function Footer() {
           <div className="space-y-5 sm:col-span-2 lg:col-span-1">
             <Logo iconSize={48} textSize="text-2xl" />
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              Connecting student talent with innovative businesses for freelance projects and internships.
+              The simplest freelance marketplace for all. Connect with top-tier talent or find your next big project.
             </p>
             <div className="flex items-center space-x-4 pt-1">
               <Link href="#" aria-label="Facebook" className="p-2 rounded-full bg-muted/50 hover:bg-primary/10 hover:text-primary transition-all">
@@ -133,7 +130,7 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Worklance. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
-            Building bridges between student potential and business innovation.
+            Empowering freelancers and businesses worldwide.
           </p>
         </div>
       </div>

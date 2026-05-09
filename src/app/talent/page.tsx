@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import TalentProfileCard from "@/components/talent/TalentProfileCard";
-import type { StudentProfile } from "@/types";
+import type { FreelancerProfile } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,9 @@ import { createBrowserClient } from '@supabase/ssr';
 const ITEMS_PER_PAGE = 9;
 
 export default function TalentPage() {
-  const [allTalent, setAllTalent] = useState<StudentProfile[]>([]);
-  const [filteredTalent, setFilteredTalent] = useState<StudentProfile[]>([]);
-  const [displayedTalent, setDisplayedTalent] = useState<StudentProfile[]>([]);
+  const [allTalent, setAllTalent] = useState<FreelancerProfile[]>([]);
+  const [filteredTalent, setFilteredTalent] = useState<FreelancerProfile[]>([]);
+  const [displayedTalent, setDisplayedTalent] = useState<FreelancerProfile[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [skillFilter, setSkillFilter] = useState("all");
@@ -31,21 +31,23 @@ export default function TalentPage() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
+      // We still use 'student' as the database role value to maintain compatibility with existing data, 
+      // but we treat it as 'freelancer' in the UI.
       const { data, error } = await supabase.from('profiles').select('*').eq('role', 'student').order('created_at', { ascending: false });
       
       if (data) {
-        const mappedData: StudentProfile[] = data.map((studentData: any) => ({
+        const mappedData: FreelancerProfile[] = data.map((studentData: any) => ({
           userId: studentData.id,
-          name: studentData.full_name || studentData.email?.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) || "Student User",
-          avatarUrl: studentData.avatar_url || `https://dummyimage.com/80x80.png/eeeeee/333333&text=${(studentData.full_name || "S").substring(0,1).toUpperCase()}`,
-          headline: studentData.headline || "Passionate student looking for opportunities",
+          name: studentData.full_name || studentData.email?.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) || "Freelancer",
+          avatarUrl: studentData.avatar_url || `https://dummyimage.com/80x80.png/eeeeee/333333&text=${(studentData.full_name || "F").substring(0,1).toUpperCase()}`,
+          headline: studentData.headline || "Expert freelancer seeking opportunities",
           skills: Array.isArray(studentData.skills) ? studentData.skills : [],
           course: studentData.course || "",
-          location: studentData.location || "Default Location",
+          location: studentData.location || "Remote",
           rating: studentData.rating ? parseFloat(String(studentData.rating)) : parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
           completedJobs: studentData.completed_jobs ? parseInt(String(studentData.completed_jobs), 10) : 0,
           hourlyRate: studentData.hourly_rate ? parseFloat(String(studentData.hourly_rate)) : undefined,
-          bio: studentData.bio || "A dedicated and enthusiastic student.",
+          bio: studentData.bio || "A dedicated professional.",
           portfolio: Array.isArray(studentData.portfolio) ? studentData.portfolio : [],
           education: Array.isArray(studentData.education) ? studentData.education : [],
           experience: Array.isArray(studentData.experience) ? studentData.experience : [],
@@ -88,23 +90,20 @@ export default function TalentPage() {
     // Then apply filters
     if (searchTerm.trim()) {
       const lowerSearchTerm = searchTerm.toLowerCase();
-      tempTalent = tempTalent.filter(student =>
-        student.name.toLowerCase().includes(lowerSearchTerm) ||
-        (student.headline && student.headline.toLowerCase().includes(lowerSearchTerm)) ||
-        (student.skills && student.skills.some(skill => skill.toLowerCase().includes(lowerSearchTerm))) ||
-        (student.course && student.course.toLowerCase().includes(lowerSearchTerm))
+      tempTalent = tempTalent.filter(freelancer =>
+        freelancer.name.toLowerCase().includes(lowerSearchTerm) ||
+        (freelancer.headline && freelancer.headline.toLowerCase().includes(lowerSearchTerm)) ||
+        (freelancer.skills && freelancer.skills.some(skill => skill.toLowerCase().includes(lowerSearchTerm))) ||
+        (freelancer.course && freelancer.course.toLowerCase().includes(lowerSearchTerm))
       );
     }
 
     if (skillFilter && skillFilter !== "all") {
-      tempTalent = tempTalent.filter(student =>
-        (student.skills && student.skills.some(skill => skill.toLowerCase().replace(/\s+/g, '_').includes(skillFilter.toLowerCase()))) ||
-        (student.course && student.course.toLowerCase().replace(/\s+/g, '_').includes(skillFilter.toLowerCase()))
+      tempTalent = tempTalent.filter(freelancer =>
+        (freelancer.skills && freelancer.skills.some(skill => skill.toLowerCase().replace(/\s+/g, '_').includes(skillFilter.toLowerCase()))) ||
+        (freelancer.course && freelancer.course.toLowerCase().replace(/\s+/g, '_').includes(skillFilter.toLowerCase()))
       );
     }
-
-    // Secondary sort (e.g., alphabetical) could be applied here if needed after filtering
-    // For now, the primary sort by createdAt is dominant.
 
     setFilteredTalent(tempTalent);
   }, [searchTerm, skillFilter, availabilityFilter, allTalent]);
@@ -126,10 +125,10 @@ export default function TalentPage() {
       <section className="text-center">
         <UserSearch className="h-16 w-16 mx-auto text-primary mb-4" />
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-          Discover Top <span className="text-primary">Student Talent</span>
+          Discover Expert <span className="text-primary">Freelancer Talent</span>
         </h1>
         <p className="mt-4 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Browse profiles of skilled university students ready to contribute to your projects. Newest talent listed first!
+          Browse profiles of skilled professionals ready to contribute to your projects. Newest talent listed first!
         </p>
       </section>
 
@@ -139,7 +138,7 @@ export default function TalentPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search by name, skill, university..."
+              placeholder="Search by name, skill, location..."
               className="pl-10 w-full rounded-lg h-11"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -147,10 +146,10 @@ export default function TalentPage() {
           </div>
           <Select value={skillFilter} onValueChange={setSkillFilter}>
             <SelectTrigger className="w-full rounded-lg h-11">
-              <SelectValue placeholder="Filter by Skill/Major" />
+              <SelectValue placeholder="Filter by Skill" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Skills/Majors</SelectItem>
+              <SelectItem value="all">All Skills</SelectItem>
               <SelectItem value="graphic_design">Graphic Design</SelectItem>
               <SelectItem value="web_development">Web Development</SelectItem>
               <SelectItem value="digital_marketing">Digital Marketing</SelectItem>
@@ -169,7 +168,6 @@ export default function TalentPage() {
               <SelectItem value="sales_support">Sales Support</SelectItem>
               <SelectItem value="admin_support">Administrative Support</SelectItem>
               <SelectItem value="research_assistant">Research Assistant</SelectItem>
-              <SelectItem value="general_help">General Help / Errands</SelectItem>
               <SelectItem value="hospitality">Hospitality & Events</SelectItem>
               <SelectItem value="manual_labor">Manual Labor & Trades</SelectItem>
               <SelectItem value="other">Other</SelectItem>
@@ -195,8 +193,8 @@ export default function TalentPage() {
         </div>
         {displayedTalent.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {displayedTalent.map((student) => (
-              <TalentProfileCard key={student.userId} student={student} />
+            {displayedTalent.map((freelancer) => (
+              <TalentProfileCard key={freelancer.userId} freelancer={freelancer} />
             ))}
           </div>
         ) : (
@@ -205,13 +203,12 @@ export default function TalentPage() {
               <UserX className="h-20 w-20 mx-auto text-muted-foreground mb-6 opacity-50" />
               <h2 className="text-2xl font-semibold text-foreground">No Talent Found</h2>
               <p className="text-muted-foreground mt-3 max-w-lg mx-auto">
-                No student profiles match your current search criteria, or no students have signed up yet.
-                If students have signed up and are not appearing, please ensure your browser's local storage has not been cleared.
+                No freelancer profiles match your current search criteria.
               </p>
               <div className="mt-6 flex gap-3">
                 <Button variant="outline" onClick={() => {setSearchTerm(""); setSkillFilter("all"); setAvailabilityFilter("any");}}>Clear All Filters</Button>
                  <Button asChild>
-                    <Link href="/signup/student">Student Signup</Link>
+                    <Link href="/signup/freelancer">Join as Freelancer</Link>
                 </Button>
               </div>
             </CardContent>
@@ -228,6 +225,3 @@ export default function TalentPage() {
     </div>
   );
 }
-    
-
-    

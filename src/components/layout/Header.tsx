@@ -19,43 +19,40 @@ import { Logo } from '@/components/shared/Logo';
 import { mainNavLinks, guestNavLinks, NavLinkType } from '@/lib/constants';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<'student' | 'client' | null>(null);
+  const [userRole, setUserRole] = useState<'freelancer' | 'client' | null>(null);
   const [userName, setUserName] = useState("User");
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
-  // Header is now visible on dashboard routes too
+  // Prevent hydration mismatch: only read client-side state after mount
 
   useEffect(() => {
+    setMounted(true);
+
+    // Read localStorage only after mount to prevent hydration mismatch
     const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
-    const roleFromStorage = localStorage.getItem('userRole') as 'student' | 'client' | null;
+    const roleFromStorage = localStorage.getItem('userRole') as 'freelancer' | 'client' | null;
     const storedName = localStorage.getItem('userName');
     setIsLoggedIn(loggedInStatus);
     setUserRole(roleFromStorage);
     if (storedName) setUserName(storedName);
-
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
     
     // Sync Supabase Auth State to LocalStorage (Essential for OAuth)
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      const supabase = createClient();
 
-      // Check immediate session on mount/nav
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          const role = session.user.user_metadata?.role || 'student';
-          const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'User';
-          const email = session.user.email || '';
+      // Check immediate session on mount
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+          const role = user.user_metadata?.role || 'freelancer';
+          const name = user.user_metadata?.full_name || user.user_metadata?.name || 'User';
+          const email = user.email || '';
           
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('userEmail', email);
@@ -71,7 +68,7 @@ export default function Header() {
       // Listen for auth changes (like returning from an OAuth callback)
       const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          const role = session.user.user_metadata?.role || 'student';
+          const role = session.user.user_metadata?.role || 'freelancer';
           const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'User';
           const email = session.user.email || '';
 
@@ -101,14 +98,11 @@ export default function Header() {
       console.error("Supabase not initialized", e);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, []);
 
   const handleLogout = async () => {
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      const supabase = createClient();
       await supabase.auth.signOut();
     } catch(e) {
       console.error("Error signing out of Supabase", e);
@@ -127,6 +121,10 @@ export default function Header() {
   };
 
   const activeLinks = mainNavLinks.filter(link => {
+    if (!mounted) {
+      // On server/first render, only show guest links
+      return !link.authRequired && !link.showWhenLoggedOutOnly;
+    }
     if (link.showWhenLoggedOutOnly && isLoggedIn) return false;
     if (link.authRequired && !isLoggedIn) return false;
     if (link.role && (!userRole || userRole !== link.role)) return false;
@@ -142,8 +140,6 @@ export default function Header() {
   const getNavLinkIcon = (label: string) => {
     if (label === 'Home') return <HomeIcon className="mr-2 h-4 w-4" />;
     if (label === 'Find Jobs') return <Search className="mr-2 h-4 w-4" />;
-    if (label === 'About') return <Info className="mr-2 h-4 w-4" />;
-    if (label === 'Contact') return <Contact className="mr-2 h-4 w-4" />;
     if (label === 'Post a Project') return <Edit className="mr-2 h-4 w-4" />;
     if (label === 'Dashboard') return <LayoutDashboard className="mr-2 h-4 w-4" />;
     if (label === 'Profile Settings') return <UserRoundCog className="mr-2 h-4 w-4" />;
@@ -187,7 +183,7 @@ export default function Header() {
     if (!isLoggedIn) return null;
 
     let profileLink = '/profile/settings'; // Unified global profile settings page
-    let dashboardLink = userRole === 'student' ? '/dashboard/student' : (userRole === 'client' ? '/dashboard/client' : '/');
+    let dashboardLink = userRole === 'freelancer' ? '/dashboard/freelancer' : (userRole === 'client' ? '/dashboard/client' : '/');
     const userEmail = localStorage.getItem('userEmail');
 
     return (

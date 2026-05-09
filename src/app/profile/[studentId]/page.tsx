@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { StudentProfile, PortfolioItem, EducationItem, ExperienceItem } from "@/types";
+import type { FreelancerProfile, PortfolioItem, EducationItem, ExperienceItem } from "@/types";
 import { Briefcase, Building, CalendarDays, DollarSign, GraduationCap, Linkedin, Mail, MessageSquare, Star, Users, Link as LinkIcon, MapPin, AlertTriangle, Loader2, BookOpenText, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,14 +15,14 @@ import { useToast } from '@/hooks/use-toast';
 import { CHAT_ID_SEPARATOR } from '@/lib/constants';
 import { createBrowserClient } from '@supabase/ssr';
 
-const constructStudentProfile = (userData: any, userId: string): StudentProfile => {
+const constructFreelancerProfile = (userData: any, userId: string): FreelancerProfile => {
   return {
     userId: userId,
     email: userId,
-    name: userData.name || "Student User",
+    name: userData.name || "Freelancer",
     avatarUrl: userData.avatarUrl || `https://dummyimage.com/128x128.png/eeeeee/333333&text=${(userData.name || userId).substring(0,1).toUpperCase()}`,
-    headline: userData.headline || "Eager to learn and contribute!",
-    bio: userData.bio || "A passionate student looking for exciting opportunities on Interna.",
+    headline: userData.headline || "Expert freelancer ready to contribute!",
+    bio: userData.bio || "A passionate professional looking for exciting opportunities.",
     skills: Array.isArray(userData.skills) ? userData.skills : [],
     course: userData.course || "",
     universityRollNo: userData.universityRollNo || "",
@@ -33,7 +33,7 @@ const constructStudentProfile = (userData: any, userId: string): StudentProfile 
     experience: Array.isArray(userData.experience) ? userData.experience : [],
     rating: userData.rating ? parseFloat(String(userData.rating)) : undefined,
     completedJobs: userData.completedJobs ? parseInt(String(userData.completedJobs), 10) : 0,
-    location: userData.location || "University City",
+    location: userData.location || "Remote",
     createdAt: userData.createdAt,
   };
 };
@@ -107,10 +107,10 @@ const ExperienceItemDisplay = ({ item }: { item: ExperienceItem }) => (
 );
 
 
-export default function StudentProfilePage() {
+export default function FreelancerProfilePage() {
   const params = useParams();
-  const studentIdFromUrl = params.studentId as string;
-  const [profile, setProfile] = useState<StudentProfile | null | undefined>(undefined);
+  const freelancerIdFromUrl = (params.studentId || params.userId) as string;
+  const [profile, setProfile] = useState<FreelancerProfile | null | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInUserEmail, setLoggedInUserEmail] = useState<string | null>(null);
   const router = useRouter();
@@ -129,13 +129,13 @@ export default function StudentProfilePage() {
           setLoggedInUserEmail(user.email?.toLowerCase() || null);
         }
 
-        if (!studentIdFromUrl) {
+        if (!freelancerIdFromUrl) {
           setProfile(null);
           setIsLoading(false);
           return;
         }
 
-        const decodedId = decodeURIComponent(studentIdFromUrl);
+        const decodedId = decodeURIComponent(freelancerIdFromUrl);
 
         const { data, error } = await supabase.from('profiles').select('*').eq('id', decodedId).single();
 
@@ -143,9 +143,7 @@ export default function StudentProfilePage() {
           console.warn('Profile not found', error);
           setProfile(null);
         } else {
-          // It's possible the `decodedId` used from talent/page mapping was the user's UUID. 
-          // So the 'id' here resolves directly!
-          setProfile(constructStudentProfile(data, data.id));
+          setProfile(constructFreelancerProfile(data, data.id));
         }
       } catch (err) {
         console.error("Error fetching profile", err);
@@ -155,7 +153,7 @@ export default function StudentProfilePage() {
       }
     };
     fetchProfile();
-  }, [studentIdFromUrl]);
+  }, [freelancerIdFromUrl]);
 
   const handleWhatsAppContact = () => {
     if (profile?.whatsappNumber) {
@@ -164,19 +162,19 @@ export default function StudentProfilePage() {
     }
   };
 
-  const handleMessageStudent = async () => {
+  const handleMessageFreelancer = async () => {
     if (!loggedInUserEmail) {
       toast({
         title: "Login Required",
-        description: "Please log in to message this student.",
+        description: "Please log in to message this freelancer.",
         variant: "destructive",
       });
       router.push('/login?redirect=' + encodeURIComponent(pathname || `/profile/${profile?.userId || ''}`));
       return;
     }
 
-    const studentId = profile?.userId;
-    if (!studentId) return;
+    const freelancerId = profile?.userId;
+    if (!freelancerId) return;
 
     try {
       const supabase = createBrowserClient(
@@ -187,20 +185,20 @@ export default function StudentProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      if (user.id === studentId) {
+      if (user.id === freelancerId) {
         toast({ title: "Action Not Available", description: "You cannot message yourself.", variant: "default" });
         return;
       }
 
       let { data: convo } = await supabase.from('conversations')
         .select('id')
-        .or(`and(participant1_id.eq.${user.id},participant2_id.eq.${studentId}),and(participant1_id.eq.${studentId},participant2_id.eq.${user.id})`)
+        .or(`and(participant1_id.eq.${user.id},participant2_id.eq.${freelancerId}),and(participant1_id.eq.${freelancerId},participant2_id.eq.${user.id})`)
         .maybeSingle();
 
       if (!convo) {
         const { data: newConvo } = await supabase.from('conversations').insert({
           participant1_id: user.id,
-          participant2_id: studentId
+          participant2_id: freelancerId
         }).select().single();
         convo = newConvo;
       }
@@ -235,7 +233,7 @@ export default function StudentProfilePage() {
                 <CardTitle className="text-2xl">Profile Not Found</CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="text-muted-foreground mt-2">The student profile for "{decodeURIComponent(studentIdFromUrl)}" could not be found or is not available. Please ensure the email is correct and the user has signed up as a student using that exact email (case-insensitively).</p>
+                <p className="text-muted-foreground mt-2">The freelancer profile for "{decodeURIComponent(freelancerIdFromUrl)}" could not be found. Please ensure the user has signed up as a freelancer.</p>
                 <Button asChild className="mt-6">
                 <Link href="/talent">Back to Talent Listings</Link>
                 </Button>
@@ -251,24 +249,14 @@ export default function StudentProfilePage() {
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-start gap-6">
             <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-primary/30 shadow-md flex-shrink-0">
-              <AvatarImage src={profile.avatarUrl} alt={profile.name} data-ai-hint="person student"/>
+              <AvatarImage src={profile.avatarUrl} alt={profile.name} data-ai-hint="person freelancer"/>
               <AvatarFallback>{profile.name.substring(0,2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex-grow">
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">{profile.name}</h1>
               <p className="text-md md:text-lg text-primary mt-0.5">{profile.headline}</p>
-              {profile.course && (
-                <div className="mt-2 flex items-center space-x-2 text-sm text-muted-foreground">
-                  <GraduationCap className="h-4 w-4" /> <span>Studying: {profile.course}</span>
-                </div>
-              )}
-              {profile.universityRollNo && (
-                <div className="mt-1 flex items-center space-x-2 text-sm text-muted-foreground">
-                  <BookOpenText className="h-4 w-4" /> <span>Roll No: {profile.universityRollNo}</span>
-                </div>
-              )}
               {profile.location && (
-                <div className="mt-1 flex items-center space-x-2 text-sm text-muted-foreground">
+                <div className="mt-2 flex items-center space-x-2 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4" /> <span>{profile.location}</span>
                 </div>
               )}
@@ -279,12 +267,12 @@ export default function StudentProfilePage() {
               )}
               {profile.hourlyRate && (
                 <div className="mt-1 flex items-center space-x-2 text-sm text-muted-foreground">
-                  <DollarSign className="h-4 w-4" /> <span>${profile.hourlyRate}/hr (example rate)</span>
+                  <DollarSign className="h-4 w-4" /> <span>${profile.hourlyRate}/hr</span>
                 </div>
               )}
               <div className="mt-4 flex flex-wrap gap-2">
-                  <Button size="lg" onClick={handleMessageStudent} disabled={!!isOwnProfile}>
-                    <MessageSquare className="mr-2 h-4 w-4" /> {isOwnProfile ? "This is Your Profile" : "Message Student"}
+                  <Button size="lg" onClick={handleMessageFreelancer} disabled={!!isOwnProfile}>
+                    <MessageSquare className="mr-2 h-4 w-4" /> {isOwnProfile ? "This is Your Profile" : "Message Freelancer"}
                   </Button>
                 {profile.whatsappNumber && !isOwnProfile && (
                   <Button size="lg" variant="outline" onClick={handleWhatsAppContact}>
@@ -296,7 +284,6 @@ export default function StudentProfilePage() {
                         <Link href="/profile/edit">Edit Your Profile</Link>
                     </Button>
                  )}
-                {!isOwnProfile && <Button size="lg" variant="outline" disabled>Invite to Job (Soon)</Button>}
                 <Button variant="ghost" size="icon" title="LinkedIn (coming soon)"><Linkedin className="h-5 w-5" /></Button>
                 <Button variant="ghost" size="icon" title="Email (coming soon)"><Mail className="h-5 w-5" /></Button>
               </div>
@@ -309,7 +296,7 @@ export default function StudentProfilePage() {
                         <span className="text-xs text-muted-foreground ml-1">({profile.completedJobs} reviews)</span>
                     </div>
                 )}
-                <p className="text-xs text-muted-foreground">{profile.completedJobs} Jobs Completed (example)</p>
+                <p className="text-xs text-muted-foreground">{profile.completedJobs} Jobs Completed</p>
                 <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-300 px-2 py-0.5 text-xs">Available for Work</Badge>
             </div>
           </div>
@@ -364,7 +351,6 @@ export default function StudentProfilePage() {
             <CardHeader><CardTitle>Client Reviews</CardTitle></CardHeader>
             <CardContent>
               <p className="text-muted-foreground text-sm">No reviews yet.</p>
-              {/* Placeholder for reviews */}
             </CardContent>
           </Card>
         </div>
